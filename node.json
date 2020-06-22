@@ -3,7 +3,6 @@
 	"permissions": {
 		"network": "Needs time source to timestamp measurements and meteorological sensor needs to be accessible"
 	},
-	"custom_ui": "config.html",
 	"options": [{
 		"title": "Timezone",
 		"ui_width": 4,
