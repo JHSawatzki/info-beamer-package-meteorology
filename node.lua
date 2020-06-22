@@ -138,8 +138,6 @@ end
 
 local clock = Clock()
 
-local function 
-
 function node.render()
 	gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
 --Different Sensors
