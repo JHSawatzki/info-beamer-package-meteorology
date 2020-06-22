@@ -142,7 +142,8 @@ function node.render()
 	gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
 --Different Sensors
 
-	local time_string = clock.human()
+	--local time_string = clock.human()
+	local time_string = "TEST TEST TEST"
 	local time_width = font:width(time_string, 100)
 	local time_x = (NATIVE_WIDTH/2)-(time_width/2)
 	font:write(time_x, 10, time_string, 100, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
