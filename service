@@ -68,7 +68,7 @@ def acquire_sensor(date_time, sensor_config):
 			params['user'] = 'admin'
 			params['password'] = sensor_config.sensor_password
 
-		sensor_response = json.loads(requests.get('http://' + sensor_config.sensor_host_ip + '/cm' params, timeout=5).text)
+		sensor_response = json.loads(requests.get('http://' + sensor_config.sensor_host_ip + '/cm', params, timeout=5).text)
 
 		sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
 		if sensor_time.year < 2020: # Date of sensor is not plausible
@@ -97,13 +97,13 @@ def acquire_sensor(date_time, sensor_config):
 
 			temperature = str(temperature)
 
-		sensor['values']['temperature'] = config.dec_sep == 'comma' ? temperature.replace(".", ",") : temperature
-		sensor['values']['humidity'] = config.dec_sep == 'comma' ? humidity.replace(".", ",") : humidity
-		sensor['values']['dew_point'] = config.dec_sep == 'comma' ? dew_point.replace(".", ",") : dew_point
+		sensor['values']['temperature'] =  temperature.replace(".", ",") if config.dec_sep == 'comma' else temperature
+		sensor['values']['humidity'] = humidity.replace(".", ",") if config.dec_sep == 'comma' else humidity
+		sensor['values']['dew_point'] = dew_point.replace(".", ",") if config.dec_sep == 'comma' else dew_point
 
 #	elif sensor.sensor_type == '': TODO Add more sensor types
-	else:
-		# Sensor type not supported!
+#	else:
+#		# Sensor type not supported!
 
 	return sensor
 
