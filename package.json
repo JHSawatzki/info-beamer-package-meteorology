@@ -1,0 +1,20 @@
+{
+	"name": "Meteorology Screen",
+	"author": "Jan Henrik Sawatzki",
+	"desc": "Shows directly acquired, meteorological sensor data for an information screen.",
+	"repository": "https://github.com/JHSawatzki/info-beamer-package-meteorology",
+	"version": "0.0.1",
+	"runtime": {
+		"always_run": true
+	},
+	"lifecycle": "alpha",
+	"nesting": {
+		"parents": ["top-level"],
+		"childs": []
+	},
+	"platforms": ["pi/epoch-1", "pi-4"],
+	"offline": {
+		"support": "maybe",
+		"info": "Needs time source to timestamp measurements and meteorological sensor needs to be accessible"
+	}
+}

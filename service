@@ -1,0 +1,137 @@
+#!/usr/bin/python2.7
+# MIT License
+# 
+# Copyright (c) 2020, Jan Henrik Sawatzki
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+from datetime import datetime
+import json
+import pytz
+import requests
+import time
+import traceback
+
+from hosted import config, node
+
+config.restart_on_update()
+
+def current_time():
+	return datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone(config.timezone)).replace(tzinfo=None)
+
+def send_clock():
+	node.send('/clock/formatted:%s' % current_time().strftime(config.time_fmt))
+
+def idle(seconds):
+	end = time.time() + seconds
+	while time.time() < end:
+		send_clock()
+		time.sleep(0.5)
+
+def celcius_2_kelvin(celsius):
+	return celsius + 273.15
+
+def fahrenheit_2_kelvin(fahrenheit):
+	return (fahrenheit + 459,67) * (5.0 / 9.0)
+
+def kelvin_2_celcius(kelvin):
+	return kelvin - 273.15
+
+def kelvin_2_fahrenheit(kelvin):
+	return kelvin * (9.0 / 5.0) - 459,67
+
+def acquire_sensor(date_time, sensor_config):
+	sensor = {}
+
+	if sensor_config.sensor_type == 'tasmota_sonoff_th_si7021':
+		sensor['sensor_title'] = sensor_config.sensor_title
+		sensor['sensor_type'] = sensor_config.sensor_type
+
+		params = {'cmnd': 'Status%208'}
+		if sensor_config.sensor_password:
+			params['user'] = 'admin'
+			params['password'] = sensor_config.sensor_password
+
+		sensor_response = json.loads(requests.get('http://' + sensor_config.sensor_host_ip + '/cm' params, timeout=5).text)
+
+		sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
+		if sensor_time.year < 2020: # Date of sensor is not plausible
+			sensor_time = date_time
+		sensor['sensor_time'] = sensor_time.strftime(config.time_fmt)
+
+		temperature = sensor_response['StatusSNS']['SI7021']['Temperature']
+		humidity = sensor_response['StatusSNS']['SI7021']['Humidity']
+		dew_point = sensor_response['StatusSNS']['SI7021']['DewPoint']
+		#sensor_temp_unit = sensor_response['StatusSNS']['SI7021']['TempUnit']
+
+		if sensor_config.sensor_temperature_unit != config.temperature_unit:
+			temperature = float(temperature)
+			if sensor_config.sensor_temperature_unit == 'celsius' and config.temperature_unit == 'fahrenheit':
+				temperature = kelvin_2_fahrenheit(celcius_2_kelvin(temperature))
+			elif sensor_config.sensor_temperature_unit == 'celsius' and config.temperature_unit == 'kelvin':
+				temperature = celcius_2_kelvin(temperature)
+			elif sensor_config.sensor_temperature_unit == 'fahrenheit' and config.temperature_unit == 'celsius':
+				temperature = kelvin_2_celcius(fahrenheit_2_kelvin(temperature))
+			elif sensor_config.sensor_temperature_unit == 'fahrenheit' and config.temperature_unit == 'kelvin':
+				temperature = fahrenheit_2_kelvin(temperature)
+			elif sensor_config.sensor_temperature_unit == 'kelvin' and config.temperature_unit == 'celsius':
+				temperature = kelvin_2_celcius(temperature)
+			elif sensor_config.sensor_temperature_unit == 'kelvin' and config.temperature_unit == 'fahrenheit':
+				temperature = kelvin_2_fahrenheit(temperature)
+
+			temperature = str(temperature)
+
+		sensor['values']['temperature'] = config.dec_sep == 'comma' ? temperature.replace(".", ",") : temperature
+		sensor['values']['humidity'] = config.dec_sep == 'comma' ? humidity.replace(".", ",") : humidity
+		sensor['values']['dew_point'] = config.dec_sep == 'comma' ? dew_point.replace(".", ",") : dew_point
+
+#	elif sensor.sensor_type == '': TODO Add more sensor types
+	else:
+		# Sensor type not supported!
+
+	return sensor
+
+def acquire_sensors(date_time):
+	sensors = []
+
+	for sensor in config.sensors:
+		sensors.extend(acquire_sensor(date_time, sensor))
+
+	with file('sensors.json', 'wb') as f:
+		f.write(json.dumps(departures, ensure_ascii=False).encode('utf8'))
+
+def main():
+	while 1:
+		try:
+			now = current_time()
+			# Wait for time to be synched
+			if now.year < 2020:
+				print >>sys.stderr, 'too soon'
+				time.sleep(1) # Give the system some time to synch time
+				continue
+
+			acquire_sensors(now)
+			idle(config.refresh_rate)
+		except Exception:
+			traceback.print_exc()
+			time.sleep(30)
+		
+
+if __name__ == '__main__':
+	main()
