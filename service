@@ -84,8 +84,6 @@ def acquire_sensor(date_time, sensor_config):
 #        sensor_temp_unit = sensor_response['StatusSNS']['SI7021']['TempUnit']
 
         if sensor_config['sensor_temperature_unit'] != config.temperature_unit:
-            temperature = float(temperature)
-            dew_point = float(dew_point)
             if sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'fahrenheit':
                 temperature = kelvin_2_fahrenheit(celsius_2_kelvin(temperature))
                 dew_point = kelvin_2_fahrenheit(celsius_2_kelvin(dew_point))
@@ -105,11 +103,11 @@ def acquire_sensor(date_time, sensor_config):
                 temperature = kelvin_2_fahrenheit(temperature)
                 dew_point = kelvin_2_fahrenheit(dew_point)
 
-            temperature = str(temperature)
-            dew_point = str(dew_point)
-
+        temperature = str(temperature)
+        humidity = str(humidity)
+        dew_point = str(dew_point)
         sensor['values'] = {}
-        sensor['values']['temperature'] =  temperature.replace(".", ",") if config.dec_sep == 'comma' else temperature
+        sensor['values']['temperature'] = temperature.replace(".", ",") if config.dec_sep == 'comma' else temperature
         sensor['values']['humidity'] = humidity.replace(".", ",") if config.dec_sep == 'comma' else humidity
         sensor['values']['dew_point'] = dew_point.replace(".", ",") if config.dec_sep == 'comma' else dew_point
 
