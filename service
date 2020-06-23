@@ -99,6 +99,7 @@ def acquire_sensor(date_time, sensor_config):
 
             temperature = str(temperature)
 
+        sensor['values'] = {}
         sensor['values']['temperature'] =  temperature.replace(".", ",") if config.dec_sep == 'comma' else temperature
         sensor['values']['humidity'] = humidity.replace(".", ",") if config.dec_sep == 'comma' else humidity
         sensor['values']['dew_point'] = dew_point.replace(".", ",") if config.dec_sep == 'comma' else dew_point
