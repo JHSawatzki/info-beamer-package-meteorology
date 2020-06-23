@@ -1,14 +1,14 @@
 {
-	"temparature_identifier": {
-		"en": "Temperature",
-		"de": "Temperatur"
-	},
-	"humidity_identifier": {
-		"en": "Humidity",
-		"de": "Luftfeuchte"
-	},
-	"dew_point_identifier": {
-		"en": "Dew Point",
-		"de": "Taupunkt"
-	}
+    "temparature_identifier": {
+        "en": "Temperature",
+        "de": "Temperatur"
+    },
+    "humidity_identifier": {
+        "en": "Humidity",
+        "de": "Luftfeuchte"
+    },
+    "dew_point_identifier": {
+        "en": "Dew Point",
+        "de": "Taupunkt"
+    }
 }

@@ -6,6 +6,9 @@ A meteorology info screen for info-beamer
 
 ## Changelog
 
+### Version 0.0.4
+
+ * Fourth test release, Output of sensor data not working
 ### Version 0.0.3
 
  * Third test release, Output of sensor data not working

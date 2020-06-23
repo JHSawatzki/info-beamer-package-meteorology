@@ -1,133 +1,133 @@
 {
-	"name": "Meteorology Screen",
-	"permissions": {
-		"network": "Needs time source to timestamp measurements and meteorological sensor needs to be accessible"
-	},
-	"options": [{
-		"title": "Timezone",
-		"ui_width": 4,
-		"name": "timezone",
-		"type": "string",
-		"default": "UTC"
-	}, {
-		"title": "Date Time Format",
-		"ui_width": 4,
-		"name": "time_fmt",
-		"type": "string",
-		"default": "%Y-%m-%d %H:%M:%S"
-	}, {
-		"title": "Language",
-		"ui_width": 4,
-		"name": "language",
-		"type": "select",
-		"options": [
-			["en", "English"],
-			["de", "German"]
-		],
-		"default": "en"
-	}, {
-		"title": "Decimal Separator",
-		"ui_width": 4,
-		"name": "dec_sep",
-		"type": "select",
-		"options": [
-			["point", "."],
-			["comma", ","]
-		],
-		"default": "point"
-	}, {
-		"title": "Font",
-		"ui_width": 4,
-		"name": "font",
-		"type": "font",
-		"default": "slkscr.ttf"
-	}, {
-		"title": "Background color",
-		"ui_width": 4,
-		"type": "color",
-		"name": "bg_color",
-		"default": [1,1,1,1]
-	 }, {
-		"title": "Font color",
-		"ui_width": 4,
-		"type": "color",
-		"name": "font_color",
-		"default": [0,0,0,1]
-	 }, {
-		"title": "Duration",
-		"ui_width": 4,
-		"name": "duration",
-		"type": "select",
-		"options": [
-			["auto", "Automatic"],
-			["5", "5 seconds"],
-			["10", "10 seconds"],
-			["15", "15 seconds"],
-			["20", "20 seconds"],
-			["60", "1 minute"]
-		],
-		"default": "10"
-	}, {
-		"title": "Temperature Unit",
-		"ui_width": 4,
-		"name": "temperature_unit",
-		"type": "select",
-		"options": [
-			["celcius", "°C"],
-			["fahrenheit", "°F"],
-			["kelvin", "K"]
-		],
-		"default": "point"
-	}, {
-		"title": "Data Refresh Rate",
-		"ui_width": 4,
-		"name": "refresh_rate",
-		"type": "duration",
-		"default": 10
-	}, {
-		"title": "Sensors",
-		"name": "sensors",
-		"type": "list",
-		"itemname": "Sensor",
-		"items": [{
-			"title": "Sensor Title",
-			"ui_width": 4,
-			"name": "sensor_title",
-			"type": "string",
-			"default": "Tunnel Entrance",
-			"hint": "Name / Location / Description of sensor"
-		}, {
-			"title": "Sensor Type",
-			"ui_width": 4,
-			"name": "sensor_type",
-			"type": "select",
-			"options": [
-				["tasmota_sonoff_th_si7021", "Tasmota Sonoff TH 10 / 16 : SI7021"]
-			],
-			"default": "tasmota_sonoff_th_si7021"
-		}, {
-			"title": "Sensor Temperature Unit",
-			"ui_width": 4,
-			"name": "sensor_temperature_unit",
-			"type": "select",
-			"options": [
-				["celcius", "°C"],
-				["fahrenheit", "°F"],
-				["kelvin", "K"]
-			],
-			"default": "point"
-		}, {
-			"title": "Hostname / IP Address",
-			"ui_width": 4,
-			"name": "sensor_host_ip",
-			"type": "string",
-			"default": "aaa.bbb.ccc.ddd"
-		}, {
-			"title": "Password",
-			"ui_width": 4,
-			"name": "sensor_password",
-			"type": "string",
-			"default": "secret"
-		}]
-	}]
+    "name": "Meteorology Screen",
+    "permissions": {
+        "network": "Needs time source to timestamp measurements and meteorological sensor needs to be accessible"
+    },
+    "options": [{
+        "title": "Timezone",
+        "ui_width": 4,
+        "name": "timezone",
+        "type": "string",
+        "default": "UTC"
+    }, {
+        "title": "Date Time Format",
+        "ui_width": 4,
+        "name": "time_fmt",
+        "type": "string",
+        "default": "%Y-%m-%d %H:%M:%S"
+    }, {
+        "title": "Language",
+        "ui_width": 4,
+        "name": "language",
+        "type": "select",
+        "options": [
+            ["en", "English"],
+            ["de", "German"]
+        ],
+        "default": "en"
+    }, {
+        "title": "Decimal Separator",
+        "ui_width": 4,
+        "name": "dec_sep",
+        "type": "select",
+        "options": [
+            ["point", "."],
+            ["comma", ","]
+        ],
+        "default": "point"
+    }, {
+        "title": "Font",
+        "ui_width": 4,
+        "name": "font",
+        "type": "font",
+        "default": "slkscr.ttf"
+    }, {
+        "title": "Background color",
+        "ui_width": 4,
+        "type": "color",
+        "name": "bg_color",
+        "default": [1,1,1,1]
+     }, {
+        "title": "Font color",
+        "ui_width": 4,
+        "type": "color",
+        "name": "font_color",
+        "default": [0,0,0,1]
+     }, {
+        "title": "Duration",
+        "ui_width": 4,
+        "name": "duration",
+        "type": "select",
+        "options": [
+            ["auto", "Automatic"],
+            ["5", "5 seconds"],
+            ["10", "10 seconds"],
+            ["15", "15 seconds"],
+            ["20", "20 seconds"],
+            ["60", "1 minute"]
+        ],
+        "default": "10"
+    }, {
+        "title": "Temperature Unit",
+        "ui_width": 4,
+        "name": "temperature_unit",
+        "type": "select",
+        "options": [
+            ["celcius", "°C"],
+            ["fahrenheit", "°F"],
+            ["kelvin", "K"]
+        ],
+        "default": "point"
+    }, {
+        "title": "Data Refresh Rate",
+        "ui_width": 4,
+        "name": "refresh_rate",
+        "type": "duration",
+        "default": 10
+    }, {
+        "title": "Sensors",
+        "name": "sensors",
+        "type": "list",
+        "itemname": "Sensor",
+        "items": [{
+            "title": "Sensor Title",
+            "ui_width": 4,
+            "name": "sensor_title",
+            "type": "string",
+            "default": "Tunnel Entrance",
+            "hint": "Name / Location / Description of sensor"
+        }, {
+            "title": "Sensor Type",
+            "ui_width": 4,
+            "name": "sensor_type",
+            "type": "select",
+            "options": [
+                ["tasmota_sonoff_th_si7021", "Tasmota Sonoff TH 10 / 16 : SI7021"]
+            ],
+            "default": "tasmota_sonoff_th_si7021"
+        }, {
+            "title": "Sensor Temperature Unit",
+            "ui_width": 4,
+            "name": "sensor_temperature_unit",
+            "type": "select",
+            "options": [
+                ["celcius", "°C"],
+                ["fahrenheit", "°F"],
+                ["kelvin", "K"]
+            ],
+            "default": "point"
+        }, {
+            "title": "Hostname / IP Address",
+            "ui_width": 4,
+            "name": "sensor_host_ip",
+            "type": "string",
+            "default": "aaa.bbb.ccc.ddd"
+        }, {
+            "title": "Password",
+            "ui_width": 4,
+            "name": "sensor_password",
+            "type": "string",
+            "default": "secret"
+        }]
+    }]
 }
