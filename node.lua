@@ -32,9 +32,9 @@ local node_config = {}
 local node_i18n = {}
 local node_sensors = {}
 
-local temparature_identifier = "Temperature: "
-local humidity_identifier = "Humidity: "
-local dew_point_identifier = "Dew point: "
+local temparature_identifier = "Temperature"
+local humidity_identifier = "Humidity"
+local dew_point_identifier = "Dew point"
 
 local temperature_unit = "°C"
 
@@ -69,9 +69,9 @@ util.json_watch("config.json", function(config)
         end
     else
         -- Fallback
-        temparature_identifier = "Temperature: "
-        humidity_identifier = "Humidity: "
-        dew_point_identifier = "Dew point: "
+        temparature_identifier = "Temperature"
+        humidity_identifier = "Humidity"
+        dew_point_identifier = "Dew point"
     end
 end)
 
@@ -94,15 +94,16 @@ util.json_watch("i18n.json", function(i18n)
         end
     else
         -- Fallback
-        temparature_identifier = "Temperature: "
-        humidity_identifier = "Humidity: "
-        dew_point_identifier = "Dew point: "
+        temparature_identifier = "Temperature"
+        humidity_identifier = "Humidity"
+        dew_point_identifier = "Dew point"
     end
 end)
 
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
 
+    pp(node_sensors[1])
     if node_sensors[1].sensor_temperature_unit == "celsius" then
         temperature_unit = "°C"
     elseif node_sensors[1].sensor_temperature_unit == "fahrenheit" then
@@ -159,7 +160,7 @@ function node.render()
     font:write(20, 210, "Sensor Name: " .. node_sensors[1].sensor_title, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
     font:write(20, 310, "Sensor Type: " .. node_sensors[1].sensor_type, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
     font:write(20, 410, "Sensor Time: " .. node_sensors[1].sensor_time, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-    font:write(20, 510, "Sensor " .. temparature_identifier .. node_sensors[1].values.temperature .. " " .. temperature_unit, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-    font:write(20, 610, "Sensor " .. humidity_identifier .. node_sensors[1].values.humidity .. " %", 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-    font:write(20, 710, "Sensor " .. dew_point_identifier .. node_sensors[1].values.dew_point .. " " .. temperature_unit, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 510, "Sensor " .. temparature_identifier .. ": " .. node_sensors[1].values.temperature .. " " .. temperature_unit, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 610, "Sensor " .. humidity_identifier .. ": " .. node_sensors[1].values.humidity .. " %", 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 710, "Sensor " .. dew_point_identifier .. ": " .. node_sensors[1].values.dew_point .. " " .. temperature_unit, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
 end
