@@ -49,8 +49,7 @@ local sensors_vertically = 1
 
 util.json_watch("config.json", function(config)
     node_config = config
-    pp(node_config)
-    font = node_config.font
+    font = resource.load_font(node_config.font.filename)
     if next(node_i18n) ~= nil then
         if node_config.language == "en" then
             temparature_identifier = node_i18n.temparature_identifier.en
@@ -140,14 +139,11 @@ end
 local clock = Clock()
 
 function node.render()
----    gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
-    gl.clear(0, 0, 0, 1)
+    gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
 --Different Sensors
 
-    --local time_string = clock.human()
-    --local time_string = "TEST TEST TEST"
-    --local time_width = font:width(time_string, 100)
-    --local time_x = (NATIVE_WIDTH/2)-(time_width/2)
-    --font:write(time_x, 10, time_string, 100, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-    font:write(130, 20, "TEST TEST TEST" , 110, 1,1,1,1)
+    local time_string = clock.human()
+    local time_width = font:width(time_string, 100)
+    local time_x = (NATIVE_WIDTH/2)-(time_width/2)
+    font:write(time_x, 10, time_string, 100, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
 end
