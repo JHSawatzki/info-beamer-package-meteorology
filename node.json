@@ -73,11 +73,11 @@
         "name": "temperature_unit",
         "type": "select",
         "options": [
-            ["celcius", "°C"],
+            ["celsius", "°C"],
             ["fahrenheit", "°F"],
             ["kelvin", "K"]
         ],
-        "default": "point"
+        "default": "celsius"
     }, {
         "title": "Data Refresh Rate",
         "ui_width": 4,
@@ -111,11 +111,11 @@
             "name": "sensor_temperature_unit",
             "type": "select",
             "options": [
-                ["celcius", "°C"],
+                ["celsius", "°C"],
                 ["fahrenheit", "°F"],
                 ["kelvin", "K"]
             ],
-            "default": "point"
+            "default": "celsius"
         }, {
             "title": "Hostname / IP Address",
             "ui_width": 4,

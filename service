@@ -45,13 +45,13 @@ def idle(seconds):
         send_clock()
         time.sleep(0.5)
 
-def celcius_2_kelvin(celsius):
+def celsius_2_kelvin(celsius):
     return celsius + 273.15
 
 def fahrenheit_2_kelvin(fahrenheit):
     return (fahrenheit + 459,67) * (5.0 / 9.0)
 
-def kelvin_2_celcius(kelvin):
+def kelvin_2_celsius(kelvin):
     return kelvin - 273.15
 
 def kelvin_2_fahrenheit(kelvin):
@@ -87,20 +87,20 @@ def acquire_sensor(date_time, sensor_config):
             temperature = float(temperature)
             dew_point = float(dew_point)
             if sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'fahrenheit':
-                temperature = kelvin_2_fahrenheit(celcius_2_kelvin(temperature))
-                dew_point = kelvin_2_fahrenheit(celcius_2_kelvin(dew_point))
+                temperature = kelvin_2_fahrenheit(celsius_2_kelvin(temperature))
+                dew_point = kelvin_2_fahrenheit(celsius_2_kelvin(dew_point))
             elif sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'kelvin':
-                temperature = celcius_2_kelvin(temperature)
-                dew_point = celcius_2_kelvin(dew_point)
+                temperature = celsius_2_kelvin(temperature)
+                dew_point = celsius_2_kelvin(dew_point)
             elif sensor_config['sensor_temperature_unit'] == 'fahrenheit' and config.temperature_unit == 'celsius':
-                temperature = kelvin_2_celcius(fahrenheit_2_kelvin(temperature))
-                dew_point = kelvin_2_celcius(fahrenheit_2_kelvin(dew_point))
+                temperature = kelvin_2_celsius(fahrenheit_2_kelvin(temperature))
+                dew_point = kelvin_2_celsius(fahrenheit_2_kelvin(dew_point))
             elif sensor_config['sensor_temperature_unit'] == 'fahrenheit' and config.temperature_unit == 'kelvin':
                 temperature = fahrenheit_2_kelvin(temperature)
                 dew_point = fahrenheit_2_kelvin(dew_point)
             elif sensor_config['sensor_temperature_unit'] == 'kelvin' and config.temperature_unit == 'celsius':
-                temperature = kelvin_2_celcius(temperature)
-                dew_point = kelvin_2_celcius(dew_point)
+                temperature = kelvin_2_celsius(temperature)
+                dew_point = kelvin_2_celsius(dew_point)
             elif sensor_config['sensor_temperature_unit'] == 'kelvin' and config.temperature_unit == 'fahrenheit':
                 temperature = kelvin_2_fahrenheit(temperature)
                 dew_point = kelvin_2_fahrenheit(dew_point)
