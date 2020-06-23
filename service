@@ -70,6 +70,7 @@ def acquire_sensor(date_time, sensor_config):
             params['password'] = sensor_config['sensor_password']
 
         sensor_response = json.loads(requests.get('http://' + sensor_config['sensor_host_ip'] + '/cm', params, timeout=5).text)
+        print >>sys.stderr, json.dumps(sensor_response, indent = 4)
 
         sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
         if sensor_time.year < 2020: # Date of sensor is not plausible
@@ -112,7 +113,6 @@ def acquire_sensors(date_time):
     sensors = []
 
     for sensor in config.sensors:
-        print >>sys.stderr, json.dumps(sensor, indent = 4)
         sensors.extend(acquire_sensor(date_time, sensor))
 
     with file('sensors.json', 'wb') as f:
