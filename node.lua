@@ -49,7 +49,7 @@ local sensors_vertically = 1
 
 util.json_watch("config.json", function(config)
     node_config = config
-    font = resource.load_font(node_config.font)
+    font = node_config.font
     if node_i18n ~= nil then
         if node_config.language == "en" then
             temparature_identifier = node_i18n.temparature_identifier.en
