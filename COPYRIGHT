@@ -25,7 +25,8 @@ Unless otherwise (see below) noted:
 
 slkscr.ttf:
 
-    Silkscreen was created by Jason Kottke and is distributed under the Open Font License, which means that you can use, distribute, or modify it however you wish.
+    Silkscreen was created by Jason Kottke and is distributed under the Open Font License,
+    which means that you can use, distribute, or modify it however you wish.
     More information about the license and Silkscreen is available on the web:
     http://scripts.sil.org/OFL
     http://www.kottke.org/plus/type/silkscreen/
@@ -38,7 +39,8 @@ package_origin.svg:
 
 package.svg, package.png:
 
-    based on package_origin.svg, rasterized from package.svg, Copyright (c) 2020, Jan Henrik Sawatzki, licensed under CC BY 4.0
+    based on package_origin.svg, rasterized from package.svg,
+    Copyright (c) 2020, Jan Henrik Sawatzki, licensed under CC BY 4.0
 
 
 hosted.js, hosted.lua, hosted.py, rpc.lua:
