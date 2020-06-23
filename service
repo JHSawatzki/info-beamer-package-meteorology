@@ -107,7 +107,7 @@ def acquire_sensor(date_time, sensor_config):
 #    elif sensor.sensor_type == '': TODO Add more sensor types
 #    else:
         # Sensor type not supported!
-
+    print >>sys.stderr, json.dumps(sensor, indent = 4)
     return sensor
 
 def acquire_sensors(date_time):
