@@ -64,7 +64,7 @@ def acquire_sensor(date_time, sensor_config):
         sensor['sensor_title'] = sensor_config['sensor_title']
         sensor['sensor_type'] = sensor_config['sensor_type']
 
-        params = {'cmnd': 'Status%208'}
+        params = {'cmnd': 'Status 8'}
         if sensor_config['sensor_password']:
             params['user'] = 'admin'
             params['password'] = sensor_config['sensor_password']
