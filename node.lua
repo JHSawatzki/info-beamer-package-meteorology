@@ -25,7 +25,7 @@ gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 
 util.noglobals()
 
-local json = require("json")
+local json = require "json"
 
 local font = resource.load_font("slkscr.ttf")
 local node_config = {}
@@ -139,12 +139,14 @@ end
 local clock = Clock()
 
 function node.render()
-    gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
+---    gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
+    gl.clear(0, 0, 0, 1)
 --Different Sensors
 
-    local time_string = clock.human()
+    --local time_string = clock.human()
     --local time_string = "TEST TEST TEST"
-    local time_width = font:width(time_string, 100)
-    local time_x = (NATIVE_WIDTH/2)-(time_width/2)
-    font:write(time_x, 10, time_string, 100, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    --local time_width = font:width(time_string, 100)
+    --local time_x = (NATIVE_WIDTH/2)-(time_width/2)
+    --font:write(time_x, 10, time_string, 100, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(130, 20, "TEST TEST TEST" , 110, 1,1,1,1)
 end
