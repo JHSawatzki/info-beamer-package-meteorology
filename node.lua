@@ -100,6 +100,7 @@ end)
 
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
+    pp(node_sensors)
 end)
 
 local function Clock()
@@ -142,8 +143,14 @@ function node.render()
     gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
 --Different Sensors
 
-    local time_string = clock.formatted()
-    local time_width = font:width(time_string, 100)
-    local time_x = (NATIVE_WIDTH/2)-(time_width/2)
-    font:write(time_x, 10, time_string, 100, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    local system_time_string = "System time: " + clock.formatted()
+--    local time_width = font:width(time_string, 100)
+--    local time_x = (NATIVE_WIDTH/2)-(time_width/2)
+    font:write(20, 10, system_time_string, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 110, "" + node_sensors[0].sensor_title, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 210, "" + node_sensors[0].sensor_type, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 310, "" + node_sensors[0].sensor_time, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 410, "" + node_sensors[0].values.temperature, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 510, "" + node_sensors[0].values.humidity, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    font:write(20, 510, "" + node_sensors[0].values.dew_point, 80, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
 end
