@@ -103,9 +103,9 @@ end)
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
 
-    if node_sensors[0].sensor_temperature_unit == "celsius" then
+    if node_sensors[1].sensor_temperature_unit == "celsius" then
         temperature_unit = "°C"
-    elseif node_sensors[0].sensor_temperature_unit == "fahrenheit" then
+    elseif node_sensors[1].sensor_temperature_unit == "fahrenheit" then
         temperature_unit = "°F"
     else
         temperature_unit = "K"
