@@ -127,6 +127,7 @@
             "ui_width": 4,
             "name": "sensor_password",
             "type": "string",
+            "ui_type": "password",
             "default": "secret"
         }]
     }]
