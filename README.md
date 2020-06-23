@@ -14,8 +14,3 @@ Add more sensor types
  * First alpha release, Ouput for one sensor is working.
  * Only ESP8266 Firmware Tasmota with template Sonoff TH and SI7021 sensor currently supported
 
-
-### Version 0.0.1 - 0.0.31
-
- * Test release, Output of sensor data not working
-
