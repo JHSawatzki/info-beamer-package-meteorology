@@ -3,7 +3,7 @@
     "author": "Jan Henrik Sawatzki",
     "desc": "Shows directly acquired, meteorological sensor data for an information screen.",
     "repository": "https://github.com/JHSawatzki/info-beamer-package-meteorology",
-    "version": "0.0.15",
+    "version": "0.0.16",
     "runtime": {
         "always_run": true
     },

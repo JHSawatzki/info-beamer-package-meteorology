@@ -114,7 +114,7 @@ def acquire_sensors(date_time):
     sensors = []
 
     for sensor in config.sensors:
-        sensors.extend(acquire_sensor(date_time, sensor))
+        sensors.append(acquire_sensor(date_time, sensor))
 
     with file('sensors.json', 'wb') as f:
         f.write(json.dumps(sensors, ensure_ascii=False).encode('utf8'))
