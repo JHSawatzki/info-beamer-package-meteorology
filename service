@@ -60,7 +60,7 @@ def kelvin_2_fahrenheit(kelvin):
 def acquire_sensor(date_time, sensor_config):
     sensor = {}
 
-    if sensor_config.sensor_type == 'tasmota_sonoff_th_si7021':
+    if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021':
         sensor['sensor_title'] = sensor_config.sensor_title
         sensor['sensor_type'] = sensor_config.sensor_type
 
