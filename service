@@ -70,7 +70,7 @@ def acquire_sensor(date_time, sensor_config):
             params['password'] = sensor_config['sensor_password']
 
         sensor_response = json.loads(requests.get('http://' + sensor_config['sensor_host_ip'] + '/cm', params, timeout=5).text)
-        print >>sys.stderr, json.dumps(sensor_response, indent = 4)
+#        print >>sys.stderr, json.dumps(sensor_response, indent = 4)
 
         sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
         if sensor_time.year < 2020: # Date of sensor is not plausible
@@ -80,7 +80,7 @@ def acquire_sensor(date_time, sensor_config):
         temperature = sensor_response['StatusSNS']['SI7021']['Temperature']
         humidity = sensor_response['StatusSNS']['SI7021']['Humidity']
         dew_point = sensor_response['StatusSNS']['SI7021']['DewPoint']
-        #sensor_temp_unit = sensor_response['StatusSNS']['SI7021']['TempUnit']
+#        sensor_temp_unit = sensor_response['StatusSNS']['SI7021']['TempUnit']
 
         if sensor_config['sensor_temperature_unit'] != config.temperature_unit:
             temperature = float(temperature)
@@ -106,7 +106,7 @@ def acquire_sensor(date_time, sensor_config):
 
 #    elif sensor.sensor_type == '': TODO Add more sensor types
 #    else:
-#        # Sensor type not supported!
+        # Sensor type not supported!
 
     return sensor
 
@@ -117,7 +117,7 @@ def acquire_sensors(date_time):
         sensors.extend(acquire_sensor(date_time, sensor))
 
     with file('sensors.json', 'wb') as f:
-        f.write(json.dumps(departures, ensure_ascii=False).encode('utf8'))
+        f.write(json.dumps(sensors, ensure_ascii=False).encode('utf8'))
 
 def main():
     while 1:
