@@ -49,6 +49,7 @@ local sensors_vertically = 1
 
 util.json_watch("config.json", function(config)
     node_config = config
+    pp(node_config)
     font = node_config.font
     if next(node_i18n) ~= nil then
         if node_config.language == "en" then
