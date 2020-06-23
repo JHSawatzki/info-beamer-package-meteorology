@@ -81,19 +81,19 @@ def acquire_sensor(date_time, sensor_config):
         dew_point = sensor_response['StatusSNS']['SI7021']['DewPoint']
         #sensor_temp_unit = sensor_response['StatusSNS']['SI7021']['TempUnit']
 
-        if sensor_config.['sensor_temperature_unit'] != config.temperature_unit:
+        if sensor_config['sensor_temperature_unit'] != config.temperature_unit:
             temperature = float(temperature)
-            if sensor_config.['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'fahrenheit':
+            if sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'fahrenheit':
                 temperature = kelvin_2_fahrenheit(celcius_2_kelvin(temperature))
-            elif sensor_config.['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'kelvin':
+            elif sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'kelvin':
                 temperature = celcius_2_kelvin(temperature)
-            elif sensor_config.['sensor_temperature_unit'] == 'fahrenheit' and config.temperature_unit == 'celsius':
+            elif sensor_config['sensor_temperature_unit'] == 'fahrenheit' and config.temperature_unit == 'celsius':
                 temperature = kelvin_2_celcius(fahrenheit_2_kelvin(temperature))
-            elif sensor_config.['sensor_temperature_unit'] == 'fahrenheit' and config.temperature_unit == 'kelvin':
+            elif sensor_config['sensor_temperature_unit'] == 'fahrenheit' and config.temperature_unit == 'kelvin':
                 temperature = fahrenheit_2_kelvin(temperature)
-            elif sensor_config.['sensor_temperature_unit'] == 'kelvin' and config.temperature_unit == 'celsius':
+            elif sensor_config['sensor_temperature_unit'] == 'kelvin' and config.temperature_unit == 'celsius':
                 temperature = kelvin_2_celcius(temperature)
-            elif sensor_config.['sensor_temperature_unit'] == 'kelvin' and config.temperature_unit == 'fahrenheit':
+            elif sensor_config['sensor_temperature_unit'] == 'kelvin' and config.temperature_unit == 'fahrenheit':
                 temperature = kelvin_2_fahrenheit(temperature)
 
             temperature = str(temperature)
