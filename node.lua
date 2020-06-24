@@ -26,7 +26,6 @@ gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 util.noglobals()
 
 local json = require "json"
-local bit32 = require "bit32"
 
 local font = resource.load_font("slkscr.ttf")
 local node_config = {}
