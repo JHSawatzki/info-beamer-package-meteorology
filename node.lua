@@ -200,30 +200,30 @@ function node.render()
             y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
             if i then
                 -- Sensor available, display
-                local sensor_header_text = sensor_identifier .. ": " .. node_sensors[1].sensor_title
+                local sensor_header_text = sensor_identifier .. ": " .. node_sensor.sensor_title
                 text_width = font:width(sensor_header_text, font_size)
                 local x_pos = x_pos + (sensor_tile_width / 2) - (text_width / 2)
                 font:write(x_pos, y_pos, sensor_header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                 x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
                 y_pos = y_pos + font_size + line_spacing
                 if node_config.show_sensor_types then
-                    font:write(x_pos, y_pos, type_identifier .. ": " .. node_sensors[1].sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, type_identifier .. ": " .. node_sensor.sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 if node_config.show_sensor_times then
-                    font:write(x_pos, y_pos, time_identifier .. ": " .. node_sensors[1].sensor_time, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, time_identifier .. ": " .. node_sensor.sensor_time, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
-                if isBitSet(node_sensors[1].sensor_display_units, 1) then
-                    font:write(x_pos, y_pos, temparature_identifier .. ": " .. node_sensors[1].values.temperature .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                if isBitSet(node_sensor.sensor_display_units, 1) then
+                    font:write(x_pos, y_pos, temparature_identifier .. ": " .. node_sensor.values.temperature .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
-                if isBitSet(node_sensors[1].sensor_display_units, 2) then
-                    font:write(x_pos, y_pos, humidity_identifier .. ": " .. node_sensors[1].values.humidity .. " %", font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                if isBitSet(node_sensor.sensor_display_units, 2) then
+                    font:write(x_pos, y_pos, humidity_identifier .. ": " .. node_sensor.values.humidity .. " %", font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
-                if isBitSet(node_sensors[1].sensor_display_units, 3) then
-                    font:write(x_pos, y_pos, dew_point_identifier .. ": " .. node_sensors[1].values.dew_point .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                if isBitSet(node_sensor.sensor_display_units, 3) then
+                    font:write(x_pos, y_pos, dew_point_identifier .. ": " .. node_sensor.values.dew_point .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 i, node_sensor = next(node_sensors)
