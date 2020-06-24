@@ -152,8 +152,7 @@ end
 local clock = Clock()
 
 local function isBitSet(number, bit)
-    local check = number & (1 << (bit - 1))
-    if check then
+    if bit32.band(number, bit32.lshift(1, (bit - 1))) then
         return true
     else
         return false
