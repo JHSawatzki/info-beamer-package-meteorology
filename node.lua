@@ -201,10 +201,10 @@ function node.render()
             if i then
                 -- Sensor available, display
                 local sensor_header_text = sensor_identifier .. ": " .. node_sensor.sensor_title
-                text_width = font:width(sensor_header_text, font_size)
-                local x_pos = x_pos + (sensor_tile_width / 2) - (text_width / 2)
+                --text_width = font:width(sensor_header_text, font_size)
+                --local x_pos = x_pos + (sensor_tile_width / 2) - (text_width / 2)
                 font:write(x_pos, y_pos, sensor_header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-                x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
+                --x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
                 y_pos = y_pos + font_size + line_spacing
                 if node_config.show_sensor_types then
                     font:write(x_pos, y_pos, type_identifier .. ": " .. node_sensor.sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
