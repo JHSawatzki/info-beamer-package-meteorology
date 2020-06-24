@@ -170,29 +170,29 @@ function node.render()
     local font_size = 40
     local y_pos = y_gap
     font:write(20, y_pos, system_time_string, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-    y_pos += font_size + y_gap
+    y_pos = y_pos + font_size + y_gap
     if next(node_sensors) ~= nil then
         font:write(20, y_pos, "Sensor " .. name_identifier .. ": " .. node_sensors[1].sensor_title, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-        y_pos += font_size + y_gap
+        y_pos = y_pos + font_size + y_gap
         if node_config.show_sensor_types then
             font:write(20, y_pos, "Sensor " .. type_identifier .. ": " .. node_sensors[1].sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos += font_size + y_gap
+            y_pos = y_pos + font_size + y_gap
         end
         if node_config.show_sensor_times then
             font:write(20, y_pos, "Sensor " .. time_identifier .. ": " .. node_sensors[1].sensor_time, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos += font_size + y_gap
+            y_pos = y_pos + font_size + y_gap
         end
         if isBitSet(node_sensors[1].sensor_display_units, 1) then
             font:write(20, y_pos, "Sensor " .. temparature_identifier .. ": " .. node_sensors[1].values.temperature .. " " .. temperature_unit, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos += font_size + y_gap
+            y_pos = y_pos + font_size + y_gap
         end
         if isBitSet(node_sensors[1].sensor_display_units, 2) then
             font:write(20, y_pos, "Sensor " .. humidity_identifier .. ": " .. node_sensors[1].values.humidity .. " %", font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos += font_size + y_gap
+            y_pos = y_pos + font_size + y_gap
         end
         if isBitSet(node_sensors[1].sensor_display_units, 3) then
             font:write(20, y_pos, "Sensor " .. dew_point_identifier .. ": " .. node_sensors[1].values.dew_point .. " " .. temperature_unit, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos += font_size + y_gap
+            y_pos = y_pos + font_size + y_gap
         end
     end
 end
