@@ -122,9 +122,9 @@ end)
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
     pp(node_sensors[1].sensor_display_units)
-    pp(isBitSet(node_sensors[1].sensor_display_units, 1))
-    pp(isBitSet(node_sensors[1].sensor_display_units, 2))
-    pp(isBitSet(node_sensors[1].sensor_display_units, 3))
+    pp(isBitSet(tonumber(node_sensors[1].sensor_display_units), 1))
+    pp(isBitSet(tonumber(node_sensors[1].sensor_display_units), 2))
+    pp(isBitSet(tonumber(node_sensors[1].sensor_display_units), 3))
 end)
 
 local function Clock()
