@@ -40,18 +40,23 @@ local type_identifier = "Type"
 local sensor_identifier = "Sensor"
 local name_identifier = "Name"
 
-local temperature_unit = "°C"
+local temperature_unit_identifier = "°C"
+
+local margin = 10
+local font_size = 40
+local header_height = 2 * margin + font_size
+local line_spacing = 10
+local sensor_tile_width = 400
+local sensor_tile_height = 300
+
+local calc_width = WIDTH - (2 * margin)
+local calc_height = HEIGHT - (2 * margin) - header_height
 
 local sensors_horizontally = 1
 local sensors_vertically = 1
-
---while WIDTH / (sensors_horizontally + 1) >= 200:
---    sensors_horizontally += 1
-
---while HEIGHT / (sensors_vertically + 1) >= 200:
---    sensors_vertically += 1
-
---sensors_per_view = w * h
+local sensors_per_page = sensors_horizontally * sensors_vertically
+local sensors_horizontally_loop = 1
+local sensors_vertically_loop = 1
 
 local function isBitSet(number, checkbit)
     if bit.band(number, bit.lshift(1, (checkbit - 1))) ~= 0 then
@@ -105,12 +110,24 @@ util.json_watch("config.json", function(config)
     node_config = config
     font = resource.load_font(node_config.font.asset_name)
     if node_config.temperature_unit == "celsius" then
-        temperature_unit = "°C"
+        temperature_unit_identifier = "°C"
     elseif node_config.temperature_unit == "fahrenheit" then
-        temperature_unit = "°F"
+        temperature_unit_identifier = "°F"
     else
-        temperature_unit = "K"
+        temperature_unit_identifier = "K"
     end
+
+    calc_width = WIDTH - (2 * margin)
+    while calc_width / (sensors_horizontally + 1) >= sensor_tile_width do
+        sensors_horizontally = sensors_horizontally + 1
+    end
+
+    calc_height = HEIGHT - (2 * margin) - header_height
+    while HEIGHT / (sensors_vertically + 1) >= sensor_tile_height do
+        sensors_vertically = sensors_vertically + 1
+    end
+
+    sensors_per_page = sensors_horizontally * sensors_vertically
     i18n(node_i18n)
 end)
 
@@ -161,38 +178,60 @@ local clock = Clock()
 
 function node.render()
     gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
---Different 
 
-    local system_time_string = "System Time: " ..  clock.formatted()
---    local time_width = font:width(time_string, 100)
---    local time_x = (NATIVE_WIDTH/2)-(time_width/2)
-    local y_gap = 10
-    local font_size = 40
-    local y_pos = y_gap
-    font:write(20, y_pos, system_time_string, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-    y_pos = y_pos + font_size + y_gap
-    if next(node_sensors) ~= nil then
-        font:write(20, y_pos, "Sensor " .. name_identifier .. ": " .. node_sensors[1].sensor_title, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-        y_pos = y_pos + font_size + y_gap
-        if node_config.show_sensor_types then
-            font:write(20, y_pos, "Sensor " .. type_identifier .. ": " .. node_sensors[1].sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos = y_pos + font_size + y_gap
+    local x_pos = margin
+    local y_pos = margin
+
+    local header_text = time_identifier .. ": " ..  clock.formatted()
+    local text_width = font:width(header_text, font_size)
+    local x_pos = x_pos + (calc_width / 2) - (text_width / 2)
+    font:write(x_pos, y_pos, header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+    x_pos = margin
+    y_pos = margin + header_height
+
+    local i, node_sensor = next(node_sensors, nil) -- Get next sensor
+    sensors_vertically_loop = sensors_vertically
+    while sensors_vertically_loop > 1 do
+        sensors_horizontally_loop = sensors_horizontally
+        while sensors_horizontally_loop > 1 do
+            x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
+            y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
+            if i then
+                -- Sensor available, display
+                local sensor_header_text = sensor_identifier .. ": " .. node_sensors[1].sensor_title
+                text_width = font:width(sensor_header_text, font_size)
+                local x_pos = x_pos + (sensor_tile_width / 2) - (text_width / 2)
+                font:write(x_pos, y_pos, sensor_header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
+                y_pos = y_pos + font_size + line_spacing
+                if node_config.show_sensor_types then
+                    font:write(x_pos, y_pos, type_identifier .. ": " .. node_sensors[1].sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    y_pos = y_pos + font_size + line_spacing
+                end
+                if node_config.show_sensor_times then
+                    font:write(x_pos, y_pos, time_identifier .. ": " .. node_sensors[1].sensor_time, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    y_pos = y_pos + font_size + line_spacing
+                end
+                if isBitSet(node_sensors[1].sensor_display_units, 1) then
+                    font:write(x_pos, y_pos, temparature_identifier .. ": " .. node_sensors[1].values.temperature .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    y_pos = y_pos + font_size + line_spacing
+                end
+                if isBitSet(node_sensors[1].sensor_display_units, 2) then
+                    font:write(x_pos, y_pos, humidity_identifier .. ": " .. node_sensors[1].values.humidity .. " %", font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    y_pos = y_pos + font_size + line_spacing
+                end
+                if isBitSet(node_sensors[1].sensor_display_units, 3) then
+                    font:write(x_pos, y_pos, dew_point_identifier .. ": " .. node_sensors[1].values.dew_point .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    y_pos = y_pos + font_size + line_spacing
+                end
+                i, node_sensor = next(node_sensors)
+            else
+                break -- No further sensor available
+            end
+            if not i then break end -- No further sensor available
+            sensors_horizontally_loop = sensors_horizontally_loop - 1
         end
-        if node_config.show_sensor_times then
-            font:write(20, y_pos, "Sensor " .. time_identifier .. ": " .. node_sensors[1].sensor_time, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos = y_pos + font_size + y_gap
-        end
-        if isBitSet(node_sensors[1].sensor_display_units, 1) then
-            font:write(20, y_pos, "Sensor " .. temparature_identifier .. ": " .. node_sensors[1].values.temperature .. " " .. temperature_unit, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos = y_pos + font_size + y_gap
-        end
-        if isBitSet(node_sensors[1].sensor_display_units, 2) then
-            font:write(20, y_pos, "Sensor " .. humidity_identifier .. ": " .. node_sensors[1].values.humidity .. " %", font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos = y_pos + font_size + y_gap
-        end
-        if isBitSet(node_sensors[1].sensor_display_units, 3) then
-            font:write(20, y_pos, "Sensor " .. dew_point_identifier .. ": " .. node_sensors[1].values.dew_point .. " " .. temperature_unit, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-            y_pos = y_pos + font_size + y_gap
-        end
+        if not i then break end -- No further sensor available
+        sensors_vertically_loop = sensors_vertically_loop - 1
     end
 end
