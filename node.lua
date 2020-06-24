@@ -46,7 +46,7 @@ local margin = 10
 local font_size = 40
 local header_height = 2 * margin + font_size
 local line_spacing = 10
-local sensor_tile_width = 400
+local sensor_tile_width = 500
 local sensor_tile_height = 300
 
 local calc_width = WIDTH - (2 * margin)
