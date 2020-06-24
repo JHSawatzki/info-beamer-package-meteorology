@@ -117,11 +117,13 @@ util.json_watch("config.json", function(config)
         temperature_unit_identifier = "K"
     end
 
+    sensors_horizontally = 1
     calc_width = WIDTH - (2 * margin)
     while calc_width / (sensors_horizontally + 1) >= sensor_tile_width do
         sensors_horizontally = sensors_horizontally + 1
     end
 
+    sensors_vertically = 1
     calc_height = HEIGHT - (2 * margin) - header_height
     while HEIGHT / (sensors_vertically + 1) >= sensor_tile_height do
         sensors_vertically = sensors_vertically + 1
@@ -191,9 +193,9 @@ function node.render()
 
     local i, node_sensor = next(node_sensors, nil) -- Get next sensor
     sensors_vertically_loop = sensors_vertically
-    while sensors_vertically_loop > 1 do
+    while sensors_vertically_loop >= 1 do
         sensors_horizontally_loop = sensors_horizontally
-        while sensors_horizontally_loop > 1 do
+        while sensors_horizontally_loop >= 1 do
             x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
             y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
             if i then
