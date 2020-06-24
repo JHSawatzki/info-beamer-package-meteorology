@@ -113,6 +113,7 @@ end)
 
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
+    pp(node_sensors[1].sensor_display_units)
 end)
 
 local function Clock()
