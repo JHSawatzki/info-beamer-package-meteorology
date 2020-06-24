@@ -106,8 +106,8 @@ util.json_watch("config.json", function(config)
     i18n(node_i18n)
 end)
 
-util.json_watch("i18n.json", function(i18n)
-    node_i18n = i18n
+util.json_watch("i18n.json", function(i18n_config)
+    node_i18n = i18n_config
     i18n(node_config)
 end)
 
