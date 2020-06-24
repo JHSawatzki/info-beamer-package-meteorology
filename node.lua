@@ -54,7 +54,7 @@ local sensors_vertically = 1
 --sensors_per_view = w * h
 
 local function isBitSet(number, checkbit)
-    if bit.band(number, bit.lshift(1, (checkbit - 1))) then
+    if bit.band(number, bit.lshift(1, (checkbit - 1))) ~= 0 then
         return true
     else
         return false
@@ -122,9 +122,9 @@ end)
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
     pp(node_sensors[1].sensor_display_units)
-    pp(isBitSet(tonumber(node_sensors[1].sensor_display_units), 1))
-    pp(isBitSet(tonumber(node_sensors[1].sensor_display_units), 2))
-    pp(isBitSet(tonumber(node_sensors[1].sensor_display_units), 3))
+    pp(isBitSet(node_sensors[1].sensor_display_units, 1))
+    pp(isBitSet(node_sensors[1].sensor_display_units, 2))
+    pp(isBitSet(node_sensors[1].sensor_display_units, 3))
 end)
 
 local function Clock()
