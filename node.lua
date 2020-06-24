@@ -53,6 +53,14 @@ local sensors_vertically = 1
 
 --sensors_per_view = w * h
 
+local function isBitSet(number, checkbit)
+    if bit.band(number, bit.lshift(1, (checkbit - 1))) then
+        return true
+    else
+        return false
+    end
+end
+
 local function i18n(config)
     if next(config) ~= nil then
         if node_config.language == "en" then
@@ -154,14 +162,6 @@ local function Clock()
 end
 
 local clock = Clock()
-
-local function isBitSet(number, checkbit)
-    if bit.band(number, bit.lshift(1, (checkbit - 1))) then
-        return true
-    else
-        return false
-    end
-end
 
 function node.render()
     gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
