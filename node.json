@@ -405,6 +405,18 @@
         "type": "duration",
         "default": 10
     }, {
+        "title": "Show Sensor Times",
+        "ui_width": 4,
+        "name": "show_sensor_times",
+        "type": "boolean",
+        "default": true
+    }, {
+        "title": "Show Sensor Types",
+        "ui_width": 4,
+        "name": "show_sensor_types",
+        "type": "boolean",
+        "default": true
+    }, {
         "title": "Sensors",
         "name": "sensors",
         "type": "list",
@@ -422,7 +434,13 @@
             "name": "sensor_type",
             "type": "select",
             "options": [
-                ["tasmota_sonoff_th_si7021", "Tasmota Sonoff TH 10 / 16 : SI7021"]
+                ["tasmota_sonoff_th_si7021_all", "Tasmota Sonoff TH 10 / 16 : SI7021 : All Units"],
+                ["tasmota_sonoff_th_si7021_temp", "Tasmota Sonoff TH 10 / 16 : SI7021 : Temperature"],
+                ["tasmota_sonoff_th_si7021_hum", "Tasmota Sonoff TH 10 / 16 : SI7021 : Humidity"],
+                ["tasmota_sonoff_th_si7021_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Dew Point"],
+                ["tasmota_sonoff_th_si7021_temp_hum", "Tasmota Sonoff TH 10 / 16 : SI7021 : Temperature + Humidity"],
+                ["tasmota_sonoff_th_si7021_temp_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Temperature + Dew Point"],
+                ["tasmota_sonoff_th_si7021_hum_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Humidity + Dew Point"]
             ],
             "default": "tasmota_sonoff_th_si7021"
         }, {

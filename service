@@ -60,10 +60,19 @@ def kelvin_2_fahrenheit(kelvin):
 def acquire_sensor(date_time, sensor_config):
     sensor = {}
 
-    if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021':
+    if sensor_config['sensor_type'].startswith('tasmota_sonoff_th_si7021'):
         sensor['sensor_title'] = sensor_config['sensor_title']
         sensor['sensor_type'] = sensor_config['sensor_type']
         sensor['sensor_temperature_unit'] = sensor_config['sensor_temperature_unit']
+        sensor['sensor_display_units'] = 0
+        if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_hum' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_dew':
+            sensor['sensor_display_units'] += 1
+
+        if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_hum' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum_dew':
+            sensor['sensor_display_units'] += 2
+
+        if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum_dew':
+            sensor['sensor_display_units'] += 4
 
         params = {'cmnd': 'Status 8'}
         if sensor_config['sensor_password']:
@@ -107,9 +116,9 @@ def acquire_sensor(date_time, sensor_config):
         humidity = str(humidity)
         dew_point = str(dew_point)
         sensor['values'] = {}
-        sensor['values']['temperature'] = temperature.replace(".", ",") if config.dec_sep == 'comma' else temperature
-        sensor['values']['humidity'] = humidity.replace(".", ",") if config.dec_sep == 'comma' else humidity
-        sensor['values']['dew_point'] = dew_point.replace(".", ",") if config.dec_sep == 'comma' else dew_point
+        sensor['values']['temperature'] = temperature.replace('.', ',') if config.dec_sep == 'comma' else temperature
+        sensor['values']['humidity'] = humidity.replace('.', ',') if config.dec_sep == 'comma' else humidity
+        sensor['values']['dew_point'] = dew_point.replace('.', ',') if config.dec_sep == 'comma' else dew_point
 
 #    elif sensor.sensor_type == '': TODO Add more sensor types
 #    else:

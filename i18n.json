@@ -10,5 +10,21 @@
     "dew_point_identifier": {
         "en": "Dew Point",
         "de": "Taupunkt"
+    },
+    "time_identifier": {
+        "en": "Time",
+        "de": "Zeit"
+    },
+    "type_identifier": {
+        "en": "Type",
+        "de": "Typ"
+    },
+    "sensor_identifier": {
+        "en": "Sensor",
+        "de": "Sensor"
+    },
+    "name_identifier": {
+        "en": "Name",
+        "de": "Name"
     }
 }
