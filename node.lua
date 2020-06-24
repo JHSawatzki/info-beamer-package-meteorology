@@ -152,7 +152,7 @@ end
 local clock = Clock()
 
 local function isBitSet(number, bit)
-    if number & (1 << (bit - 1)) then
+    if (number & (1 << (bit - 1))) then
         return true
     else
         return false
