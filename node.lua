@@ -227,6 +227,7 @@ function node.render()
                     y_pos = y_pos + font_size + line_spacing
                 end
                 i, node_sensor = next(node_sensors)
+                pp(i)
             else
                 break -- No further sensor available
             end
