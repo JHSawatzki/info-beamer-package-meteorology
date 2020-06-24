@@ -9,6 +9,10 @@ A meteorology info screen for info-beamer
 
 ## Changelog
 
+### Version 0.2
+
+ * Added options to control what information will be shown
+
 ### Version 0.1
 
  * First alpha release, Ouput for one sensor is working.
