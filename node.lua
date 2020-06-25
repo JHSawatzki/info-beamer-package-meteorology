@@ -198,7 +198,7 @@ function node.render()
     x_pos = margin
     y_pos = margin + header_height
 
-    local i, node_sensor = next(node_sensors, nil) -- Get next sensor
+    local i, node_sensor = next(node_sensors, nil) -- Get first sensor
     sensors_vertically_loop = sensors_vertically
     while sensors_vertically_loop >= 1 do
         sensors_horizontally_loop = sensors_horizontally
@@ -234,14 +234,18 @@ function node.render()
                     font:write(x_pos, y_pos, dew_point_identifier .. ": " .. node_sensor.values.dew_point .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
+                -- Get next sensor
                 i, node_sensor = next(node_sensors, i)
             else
-                break -- No further sensor available
+                -- No further sensor available
+                break
             end
-            if not i then break end -- No further sensor available
+            -- No further sensor available
+            if not i then break end
             sensors_horizontally_loop = sensors_horizontally_loop - 1
         end
-        if not i then break end -- No further sensor available
+        -- No further sensor available
+        if not i then break end
         sensors_vertically_loop = sensors_vertically_loop - 1
     end
 end
