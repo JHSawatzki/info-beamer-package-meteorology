@@ -215,7 +215,8 @@ function node.render()
                 local sensor_humidity_text = ""
                 local sensor_dew_point_text = ""
 
-                local max_width = text_width = font:width(sensor_header_text, font_size)
+                text_width = font:width(sensor_header_text, font_size)
+                local max_width = text_width
                 local actual_height = font_size + line_spacing
                 if node_config.show_sensor_types then
                     sensor_type_text = type_identifier .. ": " .. node_sensor.sensor_type
