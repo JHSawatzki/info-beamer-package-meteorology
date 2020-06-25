@@ -209,29 +209,77 @@ function node.render()
                 y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
                 -- center vertically and horizontally
                 local sensor_header_text = sensor_identifier .. ": " .. node_sensor.sensor_title
-                --text_width = font:width(sensor_header_text, font_size)
-                --local x_pos = x_pos + (sensor_tile_width / 2) - (text_width / 2)
+                local sensor_type_text = ""
+                local sensor_time_text = ""
+                local sensor_temperature_text = ""
+                local sensor_humidity_text = ""
+                local sensor_dew_point_text = ""
+
+                local max_width = text_width = font:width(sensor_header_text, font_size)
+                local actual_height = font_size + line_spacing
+                if node_config.show_sensor_types then
+                    sensor_type_text = type_identifier .. ": " .. node_sensor.sensor_type
+                    text_width = font:width(sensor_type_text, font_size)
+                    if text_width > max_width then
+                        max_width = text_width
+                    end
+                    actual_height = actual_height + font_size + line_spacing
+                end
+                if node_config.show_sensor_times then
+                    sensor_time_text = time_identifier .. ": " .. node_sensor.sensor_time
+                    text_width = font:width(sensor_time_text, font_size)
+                    if text_width > max_width then
+                        max_width = text_width
+                    end
+                    actual_height = actual_height + font_size + line_spacing
+                end
+                if isBitSet(node_sensor.sensor_display_units, 1) then
+                    sensor_temperature_text = temparature_identifier .. ": " .. node_sensor.values.temperature .. " " .. temperature_unit_identifier
+                    text_width = font:width(sensor_temperature_text, font_size)
+                    if text_width > max_width then
+                        max_width = text_width
+                    end
+                    actual_height = actual_height + font_size + line_spacing
+                end
+                if isBitSet(node_sensor.sensor_display_units, 2) then
+                    sensor_humidity_text = humidity_identifier .. ": " .. node_sensor.values.humidity .. " %"
+                    text_width = font:width(sensor_humidity_text, font_size)
+                    if text_width > max_width then
+                        max_width = text_width
+                    end
+                    actual_height = actual_height + font_size + line_spacing
+                end
+                if isBitSet(node_sensor.sensor_display_units, 3) then
+                    sensor_dew_point_text = dew_point_identifier .. ": " .. node_sensor.values.dew_point .. " " .. temperature_unit_identifier
+                    text_width = font:width(sensor_dew_point_text, font_size)
+                    if text_width > max_width then
+                        max_width = text_width
+                    end
+                    actual_height = actual_height + font_size + line_spacing
+                end
+                x_pos = x_pos + (sensor_tile_width / 2) - (max_width / 2)
+                y_pos = y_pos + (sensor_tile_height / 2) - (actual_height / 2)
+
                 font:write(x_pos, y_pos, sensor_header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
-                --x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
                 y_pos = y_pos + font_size + line_spacing
                 if node_config.show_sensor_types then
-                    font:write(x_pos, y_pos, type_identifier .. ": " .. node_sensor.sensor_type, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, sensor_type_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 if node_config.show_sensor_times then
-                    font:write(x_pos, y_pos, time_identifier .. ": " .. node_sensor.sensor_time, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, sensor_time_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 if isBitSet(node_sensor.sensor_display_units, 1) then
-                    font:write(x_pos, y_pos, temparature_identifier .. ": " .. node_sensor.values.temperature .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, sensor_temperature_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 if isBitSet(node_sensor.sensor_display_units, 2) then
-                    font:write(x_pos, y_pos, humidity_identifier .. ": " .. node_sensor.values.humidity .. " %", font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, sensor_humidity_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 if isBitSet(node_sensor.sensor_display_units, 3) then
-                    font:write(x_pos, y_pos, dew_point_identifier .. ": " .. node_sensor.values.dew_point .. " " .. temperature_unit_identifier, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
+                    font:write(x_pos, y_pos, sensor_dew_point_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                     y_pos = y_pos + font_size + line_spacing
                 end
                 -- Get next sensor
