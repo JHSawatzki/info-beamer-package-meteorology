@@ -48,8 +48,8 @@ local header_height = 2 * margin + font_size
 local line_spacing = 10
 local sensor_tile_width_init = 500
 local sensor_tile_height_init = 300
-local sensor_tile_width = 500
-local sensor_tile_height = 300
+local sensor_tile_width = sensor_tile_width_init
+local sensor_tile_height = sensor_tile_height_init
 
 local calc_width = WIDTH - (2 * margin)
 local calc_height = HEIGHT - (2 * margin) - header_height
@@ -124,6 +124,7 @@ util.json_watch("config.json", function(config)
     while calc_width / (sensors_horizontally + 1) >= sensor_tile_width_init do
         sensors_horizontally = sensors_horizontally + 1
     end
+    sensor_tile_width = sensor_tile_width_init
     sensor_tile_width = sensor_tile_width + ((calc_width - (sensors_horizontally * sensor_tile_width_init)) / sensors_horizontally)
 
     sensors_vertically = 1
@@ -131,6 +132,7 @@ util.json_watch("config.json", function(config)
     while HEIGHT / (sensors_vertically + 1) >= sensor_tile_height_init do
         sensors_vertically = sensors_vertically + 1
     end
+    sensor_tile_height = sensor_tile_height_init
     sensor_tile_height = sensor_tile_height + ((calc_width - (sensors_vertically * sensor_tile_height_init)) / sensors_vertically)
 
     sensors_per_page = sensors_horizontally * sensors_vertically
@@ -201,10 +203,11 @@ function node.render()
     while sensors_vertically_loop >= 1 do
         sensors_horizontally_loop = sensors_horizontally
         while sensors_horizontally_loop >= 1 do
-            x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
-            y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
             if i then
                 -- Sensor available, display
+                x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
+                y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
+                -- center vertically and horizontally
                 local sensor_header_text = sensor_identifier .. ": " .. node_sensor.sensor_title
                 --text_width = font:width(sensor_header_text, font_size)
                 --local x_pos = x_pos + (sensor_tile_width / 2) - (text_width / 2)
