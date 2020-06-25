@@ -46,6 +46,8 @@ local margin = 10
 local font_size = 40
 local header_height = 2 * margin + font_size
 local line_spacing = 10
+local sensor_tile_width_init = 500
+local sensor_tile_height_init = 300
 local sensor_tile_width = 500
 local sensor_tile_height = 300
 
@@ -119,15 +121,17 @@ util.json_watch("config.json", function(config)
 
     sensors_horizontally = 1
     calc_width = WIDTH - (2 * margin)
-    while calc_width / (sensors_horizontally + 1) >= sensor_tile_width do
+    while calc_width / (sensors_horizontally + 1) >= sensor_tile_width_init do
         sensors_horizontally = sensors_horizontally + 1
     end
+    sensor_tile_width = sensor_tile_width + ((calc_width - (sensors_horizontally * sensor_tile_width_init)) / sensors_horizontally)
 
     sensors_vertically = 1
     calc_height = HEIGHT - (2 * margin) - header_height
-    while HEIGHT / (sensors_vertically + 1) >= sensor_tile_height do
+    while HEIGHT / (sensors_vertically + 1) >= sensor_tile_height_init do
         sensors_vertically = sensors_vertically + 1
     end
+    sensor_tile_height = sensor_tile_height + ((calc_width - (sensors_vertically * sensor_tile_height_init)) / sensors_vertically)
 
     sensors_per_page = sensors_horizontally * sensors_vertically
     i18n(node_i18n)
@@ -140,6 +144,7 @@ end)
 
 util.json_watch("sensors.json", function(sensors)
     node_sensors = sensors
+    -- Calculate optimal space for each sensor
 end)
 
 local function Clock()
