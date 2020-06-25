@@ -60,6 +60,12 @@ local sensors_per_page = sensors_horizontally * sensors_vertically
 local sensors_horizontally_loop = 1
 local sensors_vertically_loop = 1
 
+local logo = resource.load_image{
+    file = "package.png";
+    mipmap = true;
+    nearest = true;
+}
+
 local function isBitSet(number, checkbit)
     if bit.band(number, bit.lshift(1, (checkbit - 1))) ~= 0 then
         return true
@@ -190,6 +196,8 @@ function node.render()
 
     local x_pos = margin
     local y_pos = margin
+
+    util.draw_correct(logo, x_pos, y_pos, 50, 50)
 
     local header_text = time_identifier .. ": " ..  clock.formatted()
     local text_width = font:width(header_text, font_size)
