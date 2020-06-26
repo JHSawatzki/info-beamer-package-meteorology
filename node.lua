@@ -139,7 +139,7 @@ util.json_watch("config.json", function(config)
         sensors_vertically = sensors_vertically + 1
     end
     sensor_tile_height = sensor_tile_height_init
-    sensor_tile_height = sensor_tile_height + ((calc_width - (sensors_vertically * sensor_tile_height_init)) / sensors_vertically)
+    sensor_tile_height = sensor_tile_height + ((calc_height - (sensors_vertically * sensor_tile_height_init)) / sensors_vertically)
 
     sensors_per_page = sensors_horizontally * sensors_vertically
     i18n(node_i18n)
@@ -202,6 +202,9 @@ function node.render()
     local header_text = time_identifier .. ": " ..  clock.formatted()
     local text_width = font:width(header_text, font_size)
     local x_pos = x_pos + (calc_width / 2) - (text_width / 2)
+    if x_pos < margin then
+        x_pos = margin
+    end
     font:write(x_pos, y_pos, header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
     x_pos = margin
     y_pos = margin + header_height
@@ -268,6 +271,12 @@ function node.render()
                 end
                 x_pos = x_pos + (sensor_tile_width / 2) - (max_width / 2)
                 y_pos = y_pos + (sensor_tile_height / 2) - (actual_height / 2)
+                if x_pos < margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width then
+                    x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
+                end
+                if y_pos < margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height then
+                    x_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
+                end
 
                 font:write(x_pos, y_pos, sensor_header_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                 y_pos = y_pos + font_size + line_spacing
