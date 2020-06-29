@@ -24,8 +24,10 @@
 from datetime import datetime
 import json
 import pytz
+from queue import Queue
 import requests
 import sys
+from threading import Semaphore, Thread
 import time
 import traceback
 
@@ -34,7 +36,7 @@ from hosted import config, node
 config.restart_on_update()
 
 def current_time():
-    return datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone(config.timezone)).replace(tzinfo=None)
+    return datetime.utcnow().replace(tzinfo = pytz.utc).astimezone(pytz.timezone(config.timezone)).replace(tzinfo = None)
 
 def send_clock():
     node.send('/clock/formatted:%s' % current_time().strftime(config.time_fmt))
@@ -74,13 +76,12 @@ def acquire_sensor(date_time, sensor_config):
         if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum_dew':
             sensor['sensor_display_units'] += 4
 
-        params = {'cmnd': 'Status 8'}
+        params['cmnd'] = 'Status 8'
         if sensor_config['sensor_password']:
             params['user'] = 'admin'
             params['password'] = sensor_config['sensor_password']
 
-        sensor_response = json.loads(requests.get('http://' + sensor_config['sensor_host_ip'] + '/cm', params, timeout=5).text)
-#        print >>sys.stderr, json.dumps(sensor_response, indent = 4)
+        sensor_response = json.loads(requests.get('http://' + sensor_config['sensor_host_ip'] + '/cm', params, timeout = 5).text)
 
         sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
         if sensor_time.year < 2020: # Date of sensor is not plausible
@@ -90,7 +91,6 @@ def acquire_sensor(date_time, sensor_config):
         temperature = sensor_response['StatusSNS']['SI7021']['Temperature']
         humidity = sensor_response['StatusSNS']['SI7021']['Humidity']
         dew_point = sensor_response['StatusSNS']['SI7021']['DewPoint']
-#        sensor_temp_unit = sensor_response['StatusSNS']['SI7021']['TempUnit']
 
         if sensor_config['sensor_temperature_unit'] != config.temperature_unit:
             if sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'fahrenheit':
@@ -123,19 +123,49 @@ def acquire_sensor(date_time, sensor_config):
 #    elif sensor.sensor_type == '': TODO Add more sensor types
 #    else:
         # Sensor type not supported!
-#    print >>sys.stderr, json.dumps(sensor, indent = 4)
     return sensor
 
-def acquire_sensors(date_time):
+def acquire_sensors(date_time, queue):
     sensors = []
 
-    for sensor in config.sensors:
-        sensors.append(acquire_sensor(date_time, sensor))
+    for sensor_config in config.sensors:
+        queue.put((sensors, date_time, sensor_config))
+
+    # Causes the main thread to wait for the queue to finish processing all the tasks
+    queue.join()
 
     with file('sensors.json', 'wb') as f:
         f.write(json.dumps(sensors, ensure_ascii=False).encode('utf8'))
 
+class SensorDownloadWorker(Thread):
+    def __init__(self, queue, semaphore):
+        Thread.__init__(self)
+        self.queue = queue
+        self.semaphore = semaphore
+
+    def run(self):
+        while 1:
+            # Get the work from the queue and expand the tuple
+            sensors, date_time, sensor_config = self.queue.get()
+            try:
+                sensor_data = acquire_sensor(date_time, sensor_config)
+                self.semaphore.acquire()
+                sensors.append(sensor_data)
+                self.semaphore.release()
+            finally:
+                self.queue.task_done()
+
 def main():
+    # Create a queue to communicate with the worker threads
+    workQueue = Queue()
+    sensorsSemaphore = Semaphore()
+    # Create 4 worker threads
+    for x in range(4):
+        worker = SensorDownloadWorker(workQueue, sensorsSemaphore)
+        # Setting daemon to True will let the main thread exit even though the workers are blocking
+        worker.daemon = True
+        worker.start()
+
     while 1:
         try:
             now = current_time()
@@ -145,7 +175,7 @@ def main():
                 time.sleep(1) # Give the system some time to synch time
                 continue
 
-            acquire_sensors(now)
+            acquire_sensors(now, workQueue)
             idle(config.refresh_rate)
         except Exception:
             traceback.print_exc()

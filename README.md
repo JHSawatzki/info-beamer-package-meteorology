@@ -4,14 +4,16 @@ A meteorology info screen for info-beamer
 [![Import](https://cdn.infobeamer.com/s/img/import.png)](https://info-beamer.com/use?url=https://github.com/JHSawatzki/info-beamer-package-meteorology)
 
 ## TODO
- * Sensor number to display is limited to one page
+ * Sensor number to display is limited to one page at the moment
  * Add more sensor types
+ * Cut off strings that are too long
 
 ## Changelog
 
 ### Version 0.3.0
 
  * Display of more than one sensor at a time possible
+ * Multi threaded sensor data requests
 
 ### Version 0.2.0
 
