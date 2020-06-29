@@ -76,7 +76,7 @@ def acquire_sensor(date_time, sensor_config):
         if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum_dew':
             sensor['sensor_display_units'] += 4
 
-        params['cmnd'] = 'Status 8'
+        params = {'cmnd': 'Status 8'}
         if sensor_config['sensor_password']:
             params['user'] = 'admin'
             params['password'] = sensor_config['sensor_password']
