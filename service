@@ -24,7 +24,7 @@
 from datetime import datetime
 import json
 import pytz
-from queue import Queue
+import Queue
 import requests
 import sys
 from threading import Semaphore, Thread
