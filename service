@@ -160,7 +160,7 @@ def main():
     workQueue = Queue()
     sensorsSemaphore = Semaphore()
     # Create 4 worker threads
-    for x in range(4):
+    for x in range(10):
         worker = SensorDownloadWorker(workQueue, sensorsSemaphore)
         # Setting daemon to True will let the main thread exit even though the workers are blocking
         worker.daemon = True
