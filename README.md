@@ -7,6 +7,7 @@ A meteorology info screen for info-beamer
  * Sensor number to display is limited to one page at the moment
  * Add more sensor types
  * Cut off strings that are too long
+ * Handle connection Timeouts correctly
 
 ## Changelog
 
