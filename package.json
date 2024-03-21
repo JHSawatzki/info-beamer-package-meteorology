@@ -5,7 +5,7 @@
     "repository": "https://github.com/JHSawatzki/info-beamer-package-meteorology",
     "version": "0.3.0",
     "runtime": {
-        "always_run": true
+        "always_on": true
     },
     "lifecycle": "alpha",
     "nesting": {
