@@ -440,9 +440,16 @@
                 ["tasmota_sonoff_th_si7021_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Dew Point"],
                 ["tasmota_sonoff_th_si7021_temp_hum", "Tasmota Sonoff TH 10 / 16 : SI7021 : Temperature + Humidity"],
                 ["tasmota_sonoff_th_si7021_temp_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Temperature + Dew Point"],
-                ["tasmota_sonoff_th_si7021_hum_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Humidity + Dew Point"]
+                ["tasmota_sonoff_th_si7021_hum_dew", "Tasmota Sonoff TH 10 / 16 : SI7021 : Humidity + Dew Point"],
+                ["tasmota_sht3x_all", "Tasmota SHT3X : All Units"],
+                ["tasmota_sht3x_temp", "Tasmota SHT3X : Temperature"],
+                ["tasmota_sht3x_hum", "Tasmota SHT3X : Humidity"],
+                ["tasmota_sht3x_dew", "Tasmota SHT3X : Dew Point"],
+                ["tasmota_sht3x_temp_hum", "Tasmota SHT3X : Temperature + Humidity"],
+                ["tasmota_sht3x_temp_dew", "Tasmota SHT3X : Temperature + Dew Point"],
+                ["tasmota_sht3x_hum_dew", "Tasmota SHT3X : Humidity + Dew Point"]
             ],
-            "default": "tasmota_sonoff_th_si7021"
+            "default": "tasmota_sonoff_th_si7021_all"
         }, {
             "title": "Sensor Temperature Unit",
             "ui_width": 4,

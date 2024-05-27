@@ -11,6 +11,11 @@ A meteorology info screen for info-beamer
 
 ## Changelog
 
+### Version 0.3.5
+
+ * Updated infobeamer hosted API
+ * Added support for sensor SHT3X
+
 ### Version 0.3.0
 
  * Display of more than one sensor at a time possible

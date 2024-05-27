@@ -107,7 +107,7 @@ local function i18n(config)
         temparature_identifier = "Temperature"
         humidity_identifier = "Humidity"
         dew_point_identifier = "Dew point"
-        time_identifier = "Time"
+        time_identifier = "Date / Time"
         type_identifier = "Type"
         sensor_identifier = "Sensor"
         name_identifier = "Name"

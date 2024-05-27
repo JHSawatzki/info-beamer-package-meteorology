@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # MIT License
 # 
-# Copyright (c) 2020, Jan Henrik Sawatzki
+# Copyright (c) 2020-2024, Jan Henrik Sawatzki
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -62,19 +62,22 @@ def kelvin_2_fahrenheit(kelvin):
 def acquire_sensor(date_time, sensor_config):
     sensor = {}
 
-    if sensor_config['sensor_type'].startswith('tasmota_sonoff_th_si7021'):
+    if sensor_config['sensor_type'].startswith('tasmota_sonoff_th_si7021') or sensor_config['sensor_type'].startswith('tasmota_sht3x'):
         sensor['sensor_title'] = sensor_config['sensor_title']
         sensor['sensor_type'] = sensor_config['sensor_type']
         sensor['sensor_temperature_unit'] = sensor_config['sensor_temperature_unit']
         sensor['sensor_display_units'] = 0
-        if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_hum' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_dew':
-            sensor['sensor_display_units'] += 1
+        if sensor_config['sensor_type'].endswith('_all'):
+            sensor['sensor_display_units'] = 7
+        else:
+            if sensor_config['sensor_type'].endswith('_temp') or sensor_config['sensor_type'].endswith('_temp_hum') or sensor_config['sensor_type'].endswith('_temp_dew') :
+                sensor['sensor_display_units'] += 1
 
-        if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_hum' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum_dew':
-            sensor['sensor_display_units'] += 2
+            if sensor_config['sensor_type'].endswith('_hum') or sensor_config['sensor_type'].endswith('_temp_hum') or sensor_config['sensor_type'].endswith('_hum_dew'):
+                sensor['sensor_display_units'] += 2
 
-        if sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_all' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_temp_dew' or sensor_config['sensor_type'] == 'tasmota_sonoff_th_si7021_hum_dew':
-            sensor['sensor_display_units'] += 4
+            if sensor_config['sensor_type'].endswith('_dew') or sensor_config['sensor_type'].endswith('_temp_dew') or sensor_config['sensor_type'].endswith('_hum_dew'):
+                sensor['sensor_display_units'] += 4
 
         params = {'cmnd': 'Status 8'}
         if sensor_config['sensor_password']:
@@ -84,13 +87,19 @@ def acquire_sensor(date_time, sensor_config):
         sensor_response = json.loads(requests.get('http://' + sensor_config['sensor_host_ip'] + '/cm', params, timeout = 5).text)
 
         sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
-        if sensor_time.year < 2020: # Date of sensor is not plausible
+        if sensor_time.year < 2024: # Date of sensor is not plausible
             sensor_time = date_time
         sensor['sensor_time'] = sensor_time.strftime(config.time_fmt)
 
-        temperature = sensor_response['StatusSNS']['SI7021']['Temperature']
-        humidity = sensor_response['StatusSNS']['SI7021']['Humidity']
-        dew_point = sensor_response['StatusSNS']['SI7021']['DewPoint']
+        sensor_hw = None
+        if sensor_config['sensor_type'].startswith('tasmota_sonoff_th_si7021'):
+            sensor_hw = 'SI7021'
+        elif sensor_config['sensor_type'].startswith('tasmota_sht3x'):
+            sensor_hw = 'SHT3X'
+
+        temperature = sensor_response['StatusSNS'][sensor_hw]['Temperature']
+        humidity = sensor_response['StatusSNS'][sensor_hw]['Humidity']
+        dew_point = sensor_response['StatusSNS'][sensor_hw]['DewPoint']
 
         if sensor_config['sensor_temperature_unit'] != config.temperature_unit:
             if sensor_config['sensor_temperature_unit'] == 'celsius' and config.temperature_unit == 'fahrenheit':

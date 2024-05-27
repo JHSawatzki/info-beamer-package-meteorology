@@ -12,8 +12,8 @@
         "de": "Taupunkt"
     },
     "time_identifier": {
-        "en": "Time",
-        "de": "Uhrzeit"
+        "en": "Date / Time",
+        "de": "Datum / Uhrzeit"
     },
     "type_identifier": {
         "en": "Type",
