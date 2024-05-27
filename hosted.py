@@ -31,21 +31,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-VERSION = "1.5"
+VERSION = "1.9"
 
-import os
-import re
-import sys
-import json
-import time
-import errno
-import socket
-import select
-import pyinotify
-import thread
-import threading
-import traceback
-import requests
+import os, re, sys, json, time, traceback, marshal, hashlib
+import errno, socket, select, threading, Queue, ctypes
+import pyinotify, requests
+from functools import wraps
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
 
@@ -105,6 +96,10 @@ def init_types():
         return value
 
     @type
+    def device_token(value):
+        return value
+
+    @type
     def json(value):
         return value
 
@@ -119,14 +114,11 @@ def init_types():
 init_types()
 
 def log(msg, name='hosted.py'):
-    print >>sys.stderr, "[{}] {}".format(name, msg)
+    sys.stderr.write("[{}] {}\n".format(name, msg))
 
 def abort_service(reason):
     log("restarting service (%s)" % reason)
-    try:
-        thread.interrupt_main()
-    except:
-        pass
+    os._exit(0)
     time.sleep(2)
     os.kill(os.getpid(), 2)
     time.sleep(2)
@@ -134,6 +126,23 @@ def abort_service(reason):
     time.sleep(2)
     os.kill(os.getpid(), 9)
     time.sleep(100)
+
+CLOCK_MONOTONIC_RAW = 4 # see <linux/time.h>
+
+class timespec(ctypes.Structure):
+    _fields_ = [
+        ('tv_sec', ctypes.c_long),
+        ('tv_nsec', ctypes.c_long),
+    ]
+
+librt = ctypes.CDLL('librt.so.1')
+clock_gettime = librt.clock_gettime
+clock_gettime.argtypes = [ctypes.c_int, ctypes.POINTER(timespec)]
+
+def monotonic_time():
+    t = timespec()
+    clock_gettime(CLOCK_MONOTONIC_RAW , ctypes.pointer(t))
+    return t.tv_sec + t.tv_nsec * 1e-9
 
 class InfoBeamerQueryException(Exception):
     pass
@@ -413,6 +422,11 @@ class Configuration(object):
     def metadata(self):
         return self._config['__metadata']
 
+    @property
+    def metadata_timezone(self):
+        import pytz
+        return pytz.timezone(self.metadata['timezone'])
+
     def __getitem__(self, key):
         return self._parsed[key]
 
@@ -525,6 +539,105 @@ class RPC(object):
             ).encode('utf8'))
         return call
 
+class Cache(object):
+    def __init__(self, scope='default'):
+        self._touched = set()
+        self._prefix = 'cache-%s-' % scope
+
+    def key_to_fname(self, key):
+        return self._prefix + hashlib.md5(key).hexdigest()
+
+    def has(self, key, max_age=None):
+        try:
+            stat = os.stat(self.key_to_fname(key))
+            if max_age is not None:
+                now = time.time()
+                if now > stat.st_mtime + max_age:
+                    return False
+            return True
+        except:
+            return False
+
+    def get(self, key, max_age=None):
+        try:
+            with open(self.file_ref(key)) as f:
+                if max_age is not None:
+                    stat = os.fstat(f.fileno())
+                    now = time.time()
+                    if now > stat.st_mtime + max_age:
+                        return None
+                return f.read()
+        except:
+            return None
+
+    def get_json(self, key, max_age=None):
+        data = self.get(key, max_age)
+        if data is None:
+            return None
+        return json.loads(data)
+
+    def set(self, key, value):
+        with open(self.file_ref(key), "wb") as f:
+            f.write(value)
+
+    def set_json(self, key, data):
+        self.set(key, json.dumps(data))
+
+    def file_ref(self, key):
+        fname = self.key_to_fname(key)
+        self._touched.add(fname)
+        return fname
+
+    def start(self):
+        self._touched = set()
+
+    def prune(self):
+        existing = set()
+        for fname in os.listdir("."):
+            if not fname.startswith(self._prefix):
+                continue
+            existing.add(fname)
+        prunable = existing - self._touched
+        for fname in prunable:
+            try:
+                log("pruning %s" % fname)
+                os.unlink(fname)
+            except:
+                pass
+
+    def clear(self):
+        self.start()
+        self.prune()
+
+    def call(self, max_age=None):
+        def deco(fn):
+            @wraps(fn)
+            def wrapper(*args, **kwargs):
+                key = marshal.dumps((fn.__name__, args, kwargs), 2)
+                cached = self.get(key, max_age)
+                if cached is not None:
+                    return marshal.loads(cached)
+                val = fn(*args, **kwargs)
+                self.set(key, marshal.dumps(val, 2))
+                return val
+            return wrapper
+        return deco
+
+    def file_producer(self, max_age=None):
+        def deco(fn):
+            @wraps(fn)
+            def wrapper(*args, **kwargs):
+                key = marshal.dumps((fn.__name__, args, kwargs), 2)
+                if self.has(key, max_age):
+                    return self.file_ref(key)
+                val = fn(*args, **kwargs)
+                if val is None:
+                    return None
+                self.set(key, val)
+                return self.file_ref(key)
+            return wrapper
+        return deco
+
 class Node(object):
     def __init__(self, node):
         self._node = node
@@ -536,6 +649,13 @@ class Node(object):
 
     def send(self, data):
         self.send_raw(self._node + data)
+
+    def send_json(self, path, data):
+        self.send('%s:%s' % (path, json.dumps(
+            data,
+            ensure_ascii=False,
+            separators=(',',':'),
+        ).encode('utf8')))
 
     @property
     def is_top_level(self):
@@ -594,6 +714,9 @@ class Node(object):
     def rpc(self, **callbacks):
         return RPC(self.path, callbacks)
 
+    def cache(self, scope='default'):
+        return Cache(scope)
+
     def scratch_cached(self, filename, generator):
         cached = os.path.join(os.environ['SCRATCH'], filename)
 
@@ -644,16 +767,16 @@ class APIProxy(object):
         else:
             return r.content
 
-    def add_defaults(self, kwargs):
+    def add_default_args(self, kwargs):
         if not 'timeout' in kwargs:
             kwargs['timeout'] = 10
+        return kwargs
 
     def get(self, **kwargs):
-        self.add_defaults(kwargs)
         try:
             return self.unwrap(self._apis.session.get(
                 url = self.url,
-                **kwargs
+                **self.add_default_args(kwargs)
             ))
         except APIError:
             raise
@@ -661,16 +784,27 @@ class APIProxy(object):
             raise APIError(err)
 
     def post(self, **kwargs):
-        self.add_defaults(kwargs)
         try:
             return self.unwrap(self._apis.session.post(
                 url = self.url,
-                **kwargs
+                **self.add_default_args(kwargs)
             ))
         except APIError:
             raise
         except Exception as err:
             raise APIError(err)
+
+    def delete(self, **kwargs):
+        try:
+            return self.unwrap(self._apis.session.delete(
+                url = self.url,
+                **self.add_default_args(kwargs)
+            ))
+        except APIError:
+            raise
+        except Exception as err:
+            raise APIError(err)
+
 
 class OnDeviceAPIs(object):
     def __init__(self, config):
@@ -719,6 +853,206 @@ class OnDeviceAPIs(object):
 
     def __getattr__(self, api_name):
         return APIProxy(self, api_name)
+
+class HostedAPI(object):
+    def __init__(self, api, on_device_token):
+        self._api = api
+        self._on_device_token = on_device_token
+        self._lock = threading.Lock()
+        self._next_refresh = 0
+        self._api_key = None
+        self._uses = 0
+        self._expire = 0
+        self._base_url = None
+        self._session = requests.Session()
+        self._session.headers.update({
+            'User-Agent': 'hosted.py version/%s - on-device' % (VERSION,)
+        })
+
+    def use_api_key(self):
+        with self._lock:
+            now = time.time()
+            self._uses -= 1
+            if self._uses <= 0:
+                log('hosted API adhoc key used up')
+                self._api_key = None
+            elif now > self._expire:
+                log('hosted API adhoc key expired')
+                self._api_key = None
+            else:
+                log('hosted API adhoc key usage: %d uses, %ds left' %(
+                    self._uses, self._expire - now
+                ))
+            if self._api_key is None:
+                if time.time() < self._next_refresh:
+                    return None
+                log('refreshing hosted API adhoc key')
+                self._next_refresh = time.time() + 15
+                try:
+                    r = self._api['api_key'].get(
+                        params = dict(
+                            on_device_token = self._on_device_token
+                        ),
+                        timeout = 5,
+                    )
+                except:
+                    return None
+                self._api_key = r['api_key']
+                self._uses = r['uses']
+                self._expire = now + r['expire'] - 1
+                self._base_url = r['base_url']
+            return self._api_key
+
+    def add_default_args(self, kwargs):
+        if not 'timeout' in kwargs:
+            kwargs['timeout'] = 10
+        return kwargs
+
+    def ensure_api_key(self, kwargs):
+        api_key = self.use_api_key()
+        if api_key is None:
+            raise APIError('cannot retrieve API key')
+        kwargs['auth'] = ('', api_key)
+
+    def get(self, endpoint, **kwargs):
+        try:
+            self.ensure_api_key(kwargs)
+            r = self._session.get(
+                url = self._base_url + endpoint,
+                **self.add_default_args(kwargs)
+            )
+            r.raise_for_status()
+            return r.json()
+        except APIError:
+            raise
+        except Exception as err:
+            raise APIError(err)
+
+    def post(self, endpoint, **kwargs):
+        try:
+            self.ensure_api_key(kwargs)
+            r = self._session.post(
+                url = self._base_url + endpoint,
+                **self.add_default_args(kwargs)
+            )
+            r.raise_for_status()
+            return r.json()
+        except APIError:
+            raise
+        except Exception as err:
+            raise APIError(err)
+
+    def delete(self, endpoint, **kwargs):
+        try:
+            self.ensure_api_key(kwargs)
+            r = self._session.delete(
+                url = self._base_url + endpoint,
+                **self.add_default_args(kwargs)
+            )
+            r.raise_for_status()
+            return r.json()
+        except APIError:
+            raise
+        except Exception as err:
+            raise APIError(err)
+
+class DeviceKV(object):
+    def __init__(self, api):
+        self._api = api
+        self._cache = {}
+        self._cache_complete = False
+        self._use_cache = True
+
+    def cache_enabled(self, enabled):
+        self._use_cache = enabled
+        self._cache = {}
+        self._cache_complete = False
+
+    def __setitem__(self, key, value):
+        if self._use_cache:
+            if key in self._cache and self._cache[key] == value:
+                return
+        self._api['kv'].post(
+            data = {
+                key: value
+            }
+        )
+        if self._use_cache:
+            self._cache[key] = value
+
+    def __getitem__(self, key):
+        if self._use_cache:
+            if key in self._cache:
+                return self._cache[key]
+        result = self._api['kv'].get(
+            params = dict(
+                keys = key,
+            ),
+            timeout = 5,
+        )['v']
+        if key not in result:
+            raise KeyError(key)
+        value = result[key]
+        if self._use_cache:
+            self._cache[key] = value
+        return value
+
+    # http api cannot reliably determine if a key has
+    # been deleted, so __delitem__ always succeeds and
+    # does not throw KeyError for missing keys.
+    def __delitem__(self, key):
+        if self._use_cache and self._cache_complete:
+            if key not in self._cache:
+                return
+        self._api['kv'].delete(
+            params = dict(
+                keys = key,
+            ),
+            timeout = 5,
+        )
+        if self._use_cache and key in self._cache:
+            if key in self._cache:
+                del self._cache[key]
+
+    def update(self, dct):
+        if self._use_cache:
+            for key, value in dct.items():
+                if key in self._cache and self._cache[key] == value:
+                    dct.pop(key)
+            if not dct:
+                return
+        self._api['kv'].post(
+            data = dct
+        )
+        if self._use_cache:
+            for key, value in dct.iteritems():
+                self._cache[key] = value
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def items(self):
+        if self._use_cache and self._cache_complete:
+            return self._cache.items()
+        result = self._api['kv'].get(
+            timeout = 5,
+        )['v']
+        if self._use_cache:
+            for key, value in result.iteritems():
+                self._cache[key] = value
+            self._cache_complete = True
+        return result.items()
+
+    iteritems = items
+
+    def clear(self):
+        self._api['kv'].delete()
+        if self._use_cache:
+            self._cache = {}
+            self._cache_complete = False
 
 class GPIO(object):
     def __init__(self):
@@ -805,14 +1139,155 @@ class SyncerAPI(object):
             data=data, timeout=10
         ))
 
+class ProofOfPlay(object):
+    def __init__(self, api, dirname):
+        self._api = api
+        self._prefix = os.path.join(os.environ['SCRATCH'], dirname)
+        try:
+            os.makedirs(self._prefix)
+        except:
+            pass
+
+        pop_info = self._api.pop.get()
+
+        self._max_delay = pop_info['max_delay']
+        self._max_lines = pop_info['max_lines']
+        self._submission_min_delay = pop_info['submission']['min_delay']
+        self._submission_error_delay = pop_info['submission']['error_delay']
+
+        self._q = Queue.Queue()
+        self._log = None
+
+        thread = threading.Thread(target=self._submit_thread)
+        thread.daemon = True
+        thread.start()
+
+        thread = threading.Thread(target=self._writer_thread)
+        thread.daemon = True
+        thread.start()
+
+    def _submit(self, fname, queue_size):
+        with open(fname, 'rb') as f:
+            return self._api.pop.post(
+                timeout = 10,
+                data = {
+                    'queue_size': queue_size,
+                },
+                files={
+                    'pop-v1': f,
+                }
+            )
+
+    def _submit_thread(self):
+        time.sleep(3)
+        while 1:
+            delay = self._submission_min_delay
+            try:
+                log('[pop][submit] gathering files')
+                files = [
+                    fname for fname
+                    in os.listdir(self._prefix)
+                    if fname.startswith('submit-')
+                ]
+                log('[pop][submit] %d files' % len(files))
+                for fname in files:
+                    fullname = os.path.join(self._prefix, fname)
+                    if os.stat(fullname).st_size == 0:
+                        os.unlink(fullname)
+                        continue
+                    try:
+                        log('[pop][submit] submitting %s' % fullname)
+                        status = self._submit(fullname, len(files))
+                        if status['disabled']:
+                            log('[pop][submit] WARNING: Proof of Play disabled for this device. Submission discarded')
+                        else:
+                            log('[pop][submit] success')
+                    except APIError as err:
+                        log('[pop][submit] failure to submit log %s: %s' % (
+                            fullname, err
+                        ))
+                        delay = self._submission_error_delay
+                        break
+                    os.unlink(fullname)
+                    break
+                if not files:
+                    delay = 10
+            except Exception as err:
+                log('[pop][submit] error: %s' % err)
+            log('[pop][submit] sleeping %ds' % delay)
+            time.sleep(delay)
+
+    def reopen_log(self):
+        log_name = os.path.join(self._prefix, 'current.log')
+        if self._log is not None:
+            self._log.close()
+            self._log = None
+        if os.path.exists(log_name):
+            os.rename(log_name, os.path.join(
+                self._prefix, 'submit-%s.log' % os.urandom(16).encode('hex')
+            ))
+        self._log = open(log_name, 'wb')
+        return self._log
+
+    def _writer_thread(self):
+        submit, log_file, lines = monotonic_time() + self._max_delay, self.reopen_log(), 0
+        while 1:
+            reopen = False
+            max_wait = max(0.1, submit - monotonic_time())
+            log('[pop] got %d lines. waiting %ds for more log lines' % (lines, max_wait))
+            try:
+                line = self._q.get(block=True, timeout=max_wait)
+                log_file.write(line + '\n')
+                log_file.flush()
+                os.fsync(log_file.fileno())
+                lines += 1
+                log('[pop] line added: %r' % line)
+            except Queue.Empty:
+                if lines == 0:
+                    submit += self._max_delay # extend deadline
+                else:
+                    reopen = True
+            except Exception as err:
+                log("[pop] error writing pop log line")
+            if lines >= self._max_lines:
+                reopen = True
+            if reopen:
+                log('[pop] closing log of %d lines' % lines)
+                submit, log_file, lines = monotonic_time() + self._max_delay, self.reopen_log(), 0
+
+    def log(self, play_start, duration, asset_id, asset_filename):
+        uuid = "%08x%s" % (
+            time.time(), os.urandom(12).encode('hex')
+        )
+        self._q.put(json.dumps([
+                uuid,
+                play_start,
+                duration,
+                0 if asset_id is None else asset_id,
+                asset_filename,
+            ],
+            ensure_ascii = False,
+            separators = (',',':'),
+        ).encode('utf8'))
+
 class Device(object):
-    def __init__(self):
+    def __init__(self, kv, api):
         self._socket = None
         self._gpio = GPIO()
+        self._kv = kv
+        self._api = api
+
+    @property
+    def kv(self):
+        return self._kv
 
     @property
     def gpio(self):
         return self._gpio
+
+    @property
+    def serial(self):
+        return os.environ['SERIAL']
 
     @property
     def screen_resolution(self):
@@ -826,6 +1301,10 @@ class Device(object):
     @property
     def screen_h(self):
         return self.screen_resolution[1]
+
+    @property
+    def syncer_api(self):
+        return SyncerAPI()
 
     def ensure_connected(self):
         if self._socket:
@@ -876,25 +1355,25 @@ class Device(object):
     def verify_cache(self):
         self.send_raw("syncer verify_cache")
 
-    @property
-    def syncer_api(self):
-        return SyncerAPI()
+    def pop(self, dirname='pop'):
+        return ProofOfPlay(self._api, dirname)
+
+    def hosted_api(self, on_device_token):
+        return HostedAPI(self._api, on_device_token)
 
 if __name__ == "__main__":
-    device = Device()
-    while 1:
-        try:
-            command = raw_input("syncer> ")
-            device.send_raw(command)
-        except (KeyboardInterrupt, EOFError):
-            break
-        except:
-            traceback.print_exc()
+    print("nothing to do here")
+    sys.exit(1)
 else:
     log("starting version %s" % (VERSION,))
+
     node = NODE = Node(os.environ['NODE'])
-    device = DEVICE = Device()
     config = CONFIG = Configuration()
     api = API = OnDeviceAPIs(CONFIG)
+    device = DEVICE = Device(
+        kv = DeviceKV(api),
+        api = api,
+    )
+
     setup_inotify(CONFIG)
     log("ready to go!")
