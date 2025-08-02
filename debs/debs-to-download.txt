@@ -1,0 +1,11 @@
+rrdtool
+python3-rrdtool
+librrd8
+
+libc6
+libglib2.0-0
+
+libpng16-16
+libxml2
+
+fontconfig libcairo2 libdatrie1 libdbi1 libfribidi0 libgraphite2-3 libharfbuzz0b libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpixman-1-0 librrd8 libthai-data libthai0 libxcb-render0 libxcb-shm0 libxrender1 python3-rrdtool
