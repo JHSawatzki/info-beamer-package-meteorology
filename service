@@ -144,7 +144,7 @@ def acquire_sensors(date_time, queue):
     queue.join()
 
     with file('sensors.json', 'wb') as f:
-        f.write(json.dumps(sensors, ensure_ascii=False).encode('utf8'))
+        f.write(json.dumps(sorted(sensors, key=itemgetter(0)), ensure_ascii=False).encode('utf8'))
 
 class SensorDownloadWorker(Thread):
     def __init__(self, queue, semaphore):
@@ -179,9 +179,9 @@ def main():
         try:
             now = current_time()
             # Wait for time to be synched
-            if now.year < 2020:
                 print >>sys.stderr, 'too soon'
                 time.sleep(1) # Give the system some time to synch time
+            if now.year < 2025:
                 continue
 
             acquire_sensors(now, workQueue)
