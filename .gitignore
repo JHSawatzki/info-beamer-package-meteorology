@@ -1,3 +1,5 @@
-debs/*
+debs/*.deb
 !debs/debs-to-download.txt
 overlay
+overlay.squashfs
+copyright.zip

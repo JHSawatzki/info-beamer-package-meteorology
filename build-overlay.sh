@@ -21,9 +21,16 @@ for deb in ../debs/*.deb; do
 done
 for dir in \
     usr/lib/python3.11 \
+    usr/lib/python3.11/asyncio \
+    usr/lib/python3.11/encodings \
+    usr/lib/python3.11/importlib \
     usr/lib/python3.11/multiprocessing \
     usr/lib/python3.11/urllib \
     usr/lib/python3/dist-packages \
+    usr/lib/python3/dist-packages/certifi \
+    usr/lib/python3/dist-packages/chardet \
+    usr/lib/python3/dist-packages/idna \
+    usr/lib/python3/dist-packages/requests \
     usr/lib/python3/dist-packages/urllib3 \
     usr/lib/python3/dist-packages/urllib3/util \
 ; do
