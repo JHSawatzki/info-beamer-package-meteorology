@@ -34,7 +34,7 @@
 VERSION = "1.9"
 
 import os, re, sys, json, time, traceback, marshal, hashlib
-import errno, socket, select, threading, Queue, ctypes
+import errno, socket, select, threading, queue, ctypes
 import pyinotify, requests
 from functools import wraps
 from collections import namedtuple
@@ -363,7 +363,6 @@ class InfoBeamerQuery(object):
 
     def __repr__(self):
         return "<info-beamer@%s>" % self.addr
-
 
 class Configuration(object):
     def __init__(self):
@@ -760,7 +759,7 @@ class APIProxy(object):
         if r.headers['content-type'] == 'application/json':
             resp = r.json()
             if not resp['ok']:
-                raise APIError(u"api call failed: %s" % (
+                raise APIError("api call failed: %s" % (
                     resp.get('error', '<unknown error>'),
                 ))
             return resp.get(self._api_name)
@@ -804,7 +803,6 @@ class APIProxy(object):
             raise
         except Exception as err:
             raise APIError(err)
-
 
 class OnDeviceAPIs(object):
     def __init__(self, config):
@@ -1016,7 +1014,7 @@ class DeviceKV(object):
 
     def update(self, dct):
         if self._use_cache:
-            for key, value in dct.items():
+            for key, value in list(dct.items()):
                 if key in self._cache and self._cache[key] == value:
                     dct.pop(key)
             if not dct:
@@ -1025,7 +1023,7 @@ class DeviceKV(object):
             data = dct
         )
         if self._use_cache:
-            for key, value in dct.iteritems():
+            for key, value in dct.items():
                 self._cache[key] = value
 
     def get(self, key, default=None):
@@ -1036,15 +1034,15 @@ class DeviceKV(object):
 
     def items(self):
         if self._use_cache and self._cache_complete:
-            return self._cache.items()
+            return list(self._cache.items())
         result = self._api['kv'].get(
             timeout = 5,
         )['v']
         if self._use_cache:
-            for key, value in result.iteritems():
+            for key, value in result.items():
                 self._cache[key] = value
             self._cache_complete = True
-        return result.items()
+        return list(result.items())
 
     iteritems = items
 
@@ -1155,7 +1153,7 @@ class ProofOfPlay(object):
         self._submission_min_delay = pop_info['submission']['min_delay']
         self._submission_error_delay = pop_info['submission']['error_delay']
 
-        self._q = Queue.Queue()
+        self._q = queue.Queue()
         self._log = None
 
         thread = threading.Thread(target=self._submit_thread)
@@ -1242,7 +1240,7 @@ class ProofOfPlay(object):
                 os.fsync(log_file.fileno())
                 lines += 1
                 log('[pop] line added: %r' % line)
-            except Queue.Empty:
+            except queue.Empty:
                 if lines == 0:
                     submit += self._max_delay # extend deadline
                 else:

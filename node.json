@@ -405,6 +405,25 @@
         "type": "duration",
         "default": 10
     }, {
+        "title": "Sensors per Page",
+        "ui_width": 4,
+        "name": "sensors_per_page",
+        "type": "select",
+        "options": [
+            [1, "1"],
+            [2, "2"],
+            [4, "4"],
+            [6, "6"],
+            [8, "8"]
+        ],
+        "default": 4
+    }, {
+        "title": "Page Switch Rate",
+        "ui_width": 4,
+        "name": "page_rate",
+        "type": "duration",
+        "default": 30
+    }, {
         "title": "Show Sensor Times",
         "ui_width": 4,
         "name": "show_sensor_times",

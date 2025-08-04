@@ -26,5 +26,9 @@
     "name_identifier": {
         "en": "Name",
         "de": "Name"
+    },
+    "page_identifier": {
+        "en": "Page",
+        "de": "Seite"
     }
 }

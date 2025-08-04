@@ -1,7 +1,7 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python3
 # MIT License
 # 
-# Copyright (c) 2020-2024, Jan Henrik Sawatzki
+# Copyright (c) 2020-2025, Jan Henrik Sawatzki
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,16 +22,22 @@
 # SOFTWARE.
 
 from datetime import datetime
+import hashlib
 import json
+import math
+from operator import itemgetter
 import pytz
-from Queue import Queue
+from queue import Queue
 import requests
+import rrdtool
 import sys
 from threading import Semaphore, Thread
 import time
 import traceback
 
-from hosted import config, node
+from hosted import config, node, device
+
+currentYear = 2025 # Used to test if dates are plausible
 
 config.restart_on_update()
 
@@ -59,22 +65,26 @@ def kelvin_2_celsius(kelvin):
 def kelvin_2_fahrenheit(kelvin):
     return kelvin * (9.0 / 5.0) - 459,67
 
-def acquire_sensor(date_time, sensor_config):
+def acquire_sensor(date_time, date_time_last, sensor_config):
     sensor = {}
 
     if sensor_config['sensor_type'].startswith('tasmota_sonoff_th_si7021') or sensor_config['sensor_type'].startswith('tasmota_sht3x'):
         sensor['sensor_title'] = sensor_config['sensor_title']
+        sensor['sensor_hash'] = sensor_config['sensor_hash']
         sensor['sensor_type'] = sensor_config['sensor_type']
         sensor['sensor_temperature_unit'] = sensor_config['sensor_temperature_unit']
         sensor['sensor_display_units'] = 0
+        rrd_data_mask = 0
         if sensor_config['sensor_type'].endswith('_all'):
             sensor['sensor_display_units'] = 7
         else:
             if sensor_config['sensor_type'].endswith('_temp') or sensor_config['sensor_type'].endswith('_temp_hum') or sensor_config['sensor_type'].endswith('_temp_dew') :
                 sensor['sensor_display_units'] += 1
+                rrd_data_mask += 1
 
             if sensor_config['sensor_type'].endswith('_hum') or sensor_config['sensor_type'].endswith('_temp_hum') or sensor_config['sensor_type'].endswith('_hum_dew'):
                 sensor['sensor_display_units'] += 2
+                rrd_data_mask += 2
 
             if sensor_config['sensor_type'].endswith('_dew') or sensor_config['sensor_type'].endswith('_temp_dew') or sensor_config['sensor_type'].endswith('_hum_dew'):
                 sensor['sensor_display_units'] += 4
@@ -87,7 +97,7 @@ def acquire_sensor(date_time, sensor_config):
         sensor_response = json.loads(requests.get('http://' + sensor_config['sensor_host_ip'] + '/cm', params, timeout = 5).text)
 
         sensor_time = datetime.strptime(sensor_response['StatusSNS']['Time'], '%Y-%m-%dT%H:%M:%S')
-        if sensor_time.year < 2024: # Date of sensor is not plausible
+        if sensor_time.year < currentYear: # Date of sensor is not plausible
             sensor_time = date_time
         sensor['sensor_time'] = sensor_time.strftime(config.time_fmt)
 
@@ -124,6 +134,32 @@ def acquire_sensor(date_time, sensor_config):
         temperature = str(temperature)
         humidity = str(humidity)
         dew_point = str(dew_point)
+
+        # Update RRD data
+        delta_date_time = date_time - date_time_last
+        if delta_date_time.minutes >= 10:
+            temperature_rrd = temperature
+            humidity_rrd = humidity
+
+            if rrd_data_mask - 2 < 0:
+                humidity_rrd = 'U'
+
+            rrd_data_mask -= 2
+
+            if rrd_data_mask - 1 < 0:
+                temperature_rrd = 'U'
+
+            filename = 'sensor-data-' + sensor['sensor_hash']
+            filepath = os.path.join(os.environ['SCRATCH'], filename + '.rrd')
+            rrdtool.update(filepath, 'N:' + temperature_rrd + ':' + humidity_rrd)
+            # TODO: I18N for legend entries
+            # Daily graph
+            rrdtool.graph(os.path.join(os.environ['SCRATCH'], filename + '-daily.png'), '--end', 'now', '--start', 'end-1d', '-w', '470', '-h', '240', '-D', '-a', 'PNG', '-Z', 'DEF:temp=' + filepath + ':temp:AVERAGE', 'DEF:humidity=' + filepath + ':humidity:AVERAGE', 'LINE1:temp#ff0000:\"Temperatur\"', 'LINE1:humidity#0000ff:\"Luftfeuchte\"')
+            # Monthly graph
+            rrdtool.graph(os.path.join(os.environ['SCRATCH'], filename + '-monthly.png'), '--end', 'now', '--start', 'end-1d', '-w', '470', '-h', '240', '-D', '-a', 'PNG', '-Z', 'DEF:temp=' + filepath + ':temp:AVERAGE', 'DEF:humidity=' + filepath + ':humidity:AVERAGE', 'LINE1:temp#ff0000:\"Temperatur\"', 'LINE1:humidity#0000ff:\"Luftfeuchte\"')
+            # Yearly graph
+            rrdtool.graph(os.path.join(os.environ['SCRATCH'], filename + '-yearly.png'), '--end', 'now', '--start', 'end-1d', '-w', '470', '-h', '240', '-D', '-a', 'PNG', '-Z', 'DEF:temp=' + filepath + ':temp:AVERAGE', 'DEF:humidity=' + filepath + ':humidity:AVERAGE', 'LINE1:temp#ff0000:\"Temperatur\"', 'LINE1:humidity#0000ff:\"Luftfeuchte\"')
+
         sensor['values'] = {}
         sensor['values']['temperature'] = temperature.replace('.', ',') if config.dec_sep == 'comma' else temperature
         sensor['values']['humidity'] = humidity.replace('.', ',') if config.dec_sep == 'comma' else humidity
@@ -134,11 +170,11 @@ def acquire_sensor(date_time, sensor_config):
         # Sensor type not supported!
     return sensor
 
-def acquire_sensors(date_time, queue):
+def acquire_sensors(date_time, date_time_last, queue):
     sensors = []
 
     for sensor_config in config.sensors:
-        queue.put((sensors, date_time, sensor_config))
+        queue.put((sensors, date_time, date_time_last, sensor_config))
 
     # Causes the main thread to wait for the queue to finish processing all the tasks
     queue.join()
@@ -155,9 +191,9 @@ class SensorDownloadWorker(Thread):
     def run(self):
         while 1:
             # Get the work from the queue and expand the tuple
-            sensors, date_time, sensor_config = self.queue.get()
+            sensors, date_time, date_time_last, sensor_config = self.queue.get()
             try:
-                sensor_data = acquire_sensor(date_time, sensor_config)
+                sensor_data = acquire_sensor(date_time, date_time_last, sensor_config)
                 self.semaphore.acquire()
                 sensors.append(sensor_data)
                 self.semaphore.release()
@@ -168,6 +204,15 @@ def main():
     # Create a queue to communicate with the worker threads
     workQueue = Queue()
     sensorsSemaphore = Semaphore()
+
+    # Calculate hashes for sensors and create RRD files
+    for sensor_config in config.sensors:
+        sensor_config['sensor_hash'] = hashlib.sha1(sensor_config['sensor_title'].encode("utf-8"), False).hexdigest()
+        filename = 'sensor-data-' + sensor_config['sensor_hash'] + '.rrd'
+        filepath = os.path.join(os.environ['SCRATCH'], filename)
+        if not os.path.exists(filepath):
+            rrdtool.create(filepath, '--start', 'now', '--step', '10m', 'DS:temp:GAUGE:20m:-100:100', 'DS:humidity:GAUGE:20m:0:100', 'RRA:AVERAGE:0.5:30m:1d', 'RRA:AVERAGE:0.5:6h:1M', 'RRA:AVERAGE:0.5:1d:1y', 'RRA:MAX:0.5:30m:1d', 'RRA:MAX:0.5:6h:1M', 'RRA:MAX:0.5:1d:1y', 'RRA:MIN:0.5:30m:1d', 'RRA:MIN:0.5:6h:1M', 'RRA:MIN:0.5:1d:1y')
+
     # Create 4 worker threads
     for x in range(10):
         worker = SensorDownloadWorker(workQueue, sensorsSemaphore)
@@ -175,21 +220,23 @@ def main():
         worker.daemon = True
         worker.start()
 
+    last_call = current_time();
+
     while 1:
         try:
             now = current_time()
-            # Wait for time to be synched
-                print >>sys.stderr, 'too soon'
-                time.sleep(1) # Give the system some time to synch time
-            if now.year < 2025:
+            # Wait for time to be synced
+            if now.year < currentYear:
+                print('too soon', file=sys.stderr)
+                time.sleep(1) # Give the system some time to sync time
                 continue
 
-            acquire_sensors(now, workQueue)
+            acquire_sensors(now, last_call, workQueue)
+            last_call = current_time();
             idle(config.refresh_rate)
         except Exception:
             traceback.print_exc()
             time.sleep(30)
-        
 
 if __name__ == '__main__':
     main()

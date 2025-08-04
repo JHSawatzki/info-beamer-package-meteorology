@@ -4,12 +4,21 @@ A meteorology info screen for info-beamer
 [![Import](https://cdn.infobeamer.com/s/img/import.png)](https://info-beamer.com/use?url=https://github.com/JHSawatzki/info-beamer-package-meteorology)
 
 ## TODO
- * Sensor number to display is limited to one page at the moment
  * Add more sensor types
  * Cut off strings that are too long
  * Handle connection Timeouts correctly
+ * and more... see TODO comments in source...
 
 ## Changelog
+
+### Version 0.4.0
+
+ * Fixed changing order of sensors
+ * Addded pagination for larger sensor setups
+   The number of sensors to be displayed per page is configurable, but may be overriden by the actual screen limitations regarding available space.
+   Pages are periodically switched in a configurable time interval
+ * Added support for storage and display of historic data using rrdtool (loaded via squashfs overlay)
+ * Switched to python3 using squashfs overlay
 
 ### Version 0.3.5
 
