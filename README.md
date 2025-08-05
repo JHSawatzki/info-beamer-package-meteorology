@@ -1,32 +1,29 @@
-# info-beamer-package-meteorology
-A meteorology info screen for info-beamer
+# Python3 and rrdtool squashfs overlay for info-beamer
+An info-beamer squashfs overlay for python3 and rrdtool support.
 
-[![Import](https://cdn.infobeamer.com/s/img/import.png)](https://info-beamer.com/use?url=https://github.com/JHSawatzki/info-beamer-package-meteorology)
+This branch is part of the info-beamer package "meteorology info screen".
 
-## TODO
- * Sensor number to display is limited to one page at the moment
- * Add more sensor types
- * Cut off strings that are too long
- * Handle connection Timeouts correctly
+This package bundles a Python3 runtime and rrdtool into a
+[overlay.squashfs file](https://info-beamer.com/doc/package-services#customoverlay).
+info-beamer OS will detect this file and mount it as an overlay into the
+package service's filesystem. This makes Python3.11 available for use in
+your `service`.
 
-## Changelog
+The first time python3 is invoked it will precompile some python modules
+and save the result in the package's
+[scratch directory](https://info-beamer.com/doc/package-services#scratchdirectory).
 
-### Version 0.3.5
+## Using in your own package
 
- * Updated infobeamer hosted API
- * Added support for sensor SHT3X
+1. Copy `overlay.squashfs` into your package. 
+1. Invoke `python3` as your package service's interpreter.
 
-### Version 0.3.0
+## Building this package
 
- * Display of more than one sensor at a time possible
- * Multi threaded sensor data requests
+The included build-overlay and Makefile can be used to create the included
+`overlay.squashfs`. Right now Raspbian OS (bookworm) binary packages are used
+instead of building its own. On Raspbian OS use the `download-packages.sh`
+in directory `debs` to download all needed packages.
 
-### Version 0.2.0
-
- * Added options to control what information will be shown
-
-### Version 0.1.0
-
- * First alpha release, Ouput for one sensor is working.
- * Only ESP8266 Firmware Tasmota with template Sonoff TH and SI7021 sensor currently supported
+Then invoke `make` and you'll end up with a new version of `overlay.squashfs`.
 
