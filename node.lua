@@ -226,7 +226,7 @@ util.json_watch("sensors.json", function(sensors)
 
     -- Check if pages to be displayed changed (depends on sensor count and how many sensors should/can be displayed on screen)
     local sensor_pages_new = math.ceil(length(node_sensors) / sensors_per_page)
-    if sensor_pages_new != sensor_pages then
+    if sensor_pages_new ~= sensor_pages then
         sensor_pages = sensor_pages_new
         current_page = 1
         last_page_change = clock.unix()
