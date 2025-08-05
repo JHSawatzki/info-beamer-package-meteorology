@@ -1,0 +1,4 @@
+libc6
+libglib2.0-0
+libpng16-16
+libxml2
