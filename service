@@ -43,7 +43,7 @@ currentYear = 2025 # Used to test if dates are plausible
 config.restart_on_update()
 
 def current_time():
-    return datetime.utcnow().replace(tzinfo = tzutc()).astimezone(gettz(config.timezone)).replace(tzinfo = None)
+    return datetime.utcnow().replace(tzinfo = UTC).astimezone(gettz(config.timezone)).replace(tzinfo = None)
 
 def send_clock():
     node.send('/clock/formatted:%s' % current_time().strftime(config.time_fmt))
