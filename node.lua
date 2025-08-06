@@ -378,17 +378,23 @@ function node.render()
                     local sensor_history = resource.load_image{
                         file = os.getenv("SCRATCH") .. "/sensor-data-" .. node_sensor.sensor_hash .. "-daily.png";
                     }
-                    util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
+                    if sensor_history ~= nil then
+                        util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
+                    end
                 elseif view == 3 then
                     local sensor_history = resource.load_image{
                         file = os.getenv("SCRATCH") .. "/sensor-data-" .. node_sensor.sensor_hash .. "-monthly.png"
                     }
-                    util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
+                    if sensor_history ~= nil then
+                        util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
+                    end
                 elseif view == 4 then
                     local sensor_history = resource.load_image{
                         file = os.getenv("SCRATCH") .. "/sensor-data-" .. node_sensor.sensor_hash .. "-yearly.png"
                     }
-                    util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
+                    if sensor_history ~= nil then
+                        util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
+                    end
                 end
                 -- Get next sensor
                 i, node_sensor = next(node_sensors, i)
