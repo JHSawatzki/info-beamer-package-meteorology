@@ -25,6 +25,8 @@ gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 
 util.noglobals()
 
+node.make_nested()
+
 local json = require "json"
 
 local font = resource.load_font("slkscr.ttf")
@@ -378,21 +380,21 @@ function node.render()
                     end
                 elseif view == 2 then 
                     local sensor_history = resource.load_image{
-                        file = os.getenv("SCRATCH") .. "/sensor-data-" .. node_sensor.sensor_hash .. "-daily.png";
+                        file = "myscratch/sensor-data-" .. node_sensor.sensor_hash .. "-daily.png";
                     }
                     if sensor_history ~= nil then
                         util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
                     end
                 elseif view == 3 then
                     local sensor_history = resource.load_image{
-                        file = os.getenv("SCRATCH") .. "/sensor-data-" .. node_sensor.sensor_hash .. "-monthly.png"
+                        file = "myscratch/sensor-data-" .. node_sensor.sensor_hash .. "-monthly.png"
                     }
                     if sensor_history ~= nil then
                         util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
                     end
                 elseif view == 4 then
                     local sensor_history = resource.load_image{
-                        file = os.getenv("SCRATCH") .. "/sensor-data-" .. node_sensor.sensor_hash .. "-yearly.png"
+                        file = "myscratch/sensor-data-" .. node_sensor.sensor_hash .. "-yearly.png"
                     }
                     if sensor_history ~= nil then
                         util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
