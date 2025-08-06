@@ -270,7 +270,7 @@ function node.render()
     local starting_sensor_index = (current_page - 1) * sensors_per_page + 1
     local i, node_sensor = next(node_sensors, nil) -- Get first sensor
 
-    while i then
+    while i do
         if i < starting_sensor_index then
             -- Get next sensor
             i, node_sensor = next(node_sensors, i)
