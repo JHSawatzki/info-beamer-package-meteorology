@@ -644,7 +644,7 @@ class Node(object):
 
     def send_raw(self, raw):
         log("sending %r" % (raw,))
-        self._sock.sendto(raw, ('127.0.0.1', 4444))
+        self._sock.sendto(raw.encode('utf8'), ('127.0.0.1', 4444))
 
     def send(self, data):
         self.send_raw(self._node + data)
