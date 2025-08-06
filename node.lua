@@ -39,6 +39,7 @@ local time_identifier = "Time"
 local type_identifier = "Type"
 local sensor_identifier = "Sensor"
 local name_identifier = "Name"
+local name_identifier = "Name"
 
 local temperature_unit_identifier = "°C"
 
@@ -49,7 +50,7 @@ local line_spacing = 10
 local sensor_tile_width_init = 500
 local sensor_tile_height_init = 300
 local sensor_tile_width = sensor_tile_width_init
-local sensor_tile_height = sensor_tile_height_init
+local page_identifier = sensor_tile_height_init
 
 local calc_width = WIDTH - (2 * margin)
 local calc_height = HEIGHT - (2 * margin) - header_height
