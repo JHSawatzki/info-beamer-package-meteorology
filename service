@@ -138,7 +138,7 @@ def acquire_sensor(date_time, date_time_last, sensor_config):
 
         # Update RRD data
         delta_date_time = date_time - date_time_last
-        if delta_date_time.minutes >= 10:
+        if delta_date_time.seconds >= 600:
             temperature_rrd = temperature
             humidity_rrd = humidity
 
@@ -233,7 +233,9 @@ def main():
                 continue
 
             acquire_sensors(now, last_call, workQueue)
-            last_call = current_time();
+            delta = now - last_call
+            if delta.seconds >= 600:
+                last_call = now;
             idle(config.refresh_rate)
         except Exception:
             traceback.print_exc()
