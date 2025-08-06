@@ -180,7 +180,7 @@ def acquire_sensors(date_time, date_time_last, queue):
     # Causes the main thread to wait for the queue to finish processing all the tasks
     queue.join()
 
-    with file('sensors.json', 'wb') as f:
+    with open('sensors.json', 'wb') as f:
         f.write(json.dumps(sorted(sensors, key=itemgetter(0)), ensure_ascii=False).encode('utf8'))
 
 class SensorDownloadWorker(Thread):
