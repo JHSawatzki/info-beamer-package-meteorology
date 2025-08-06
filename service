@@ -207,7 +207,7 @@ def main():
 
     # Calculate hashes for sensors and create RRD files
     for sensor_config in config.sensors:
-        sensor_config['sensor_hash'] = hashlib.sha1(sensor_config['sensor_title'].encode("utf-8"), False).hexdigest()
+        sensor_config['sensor_hash'] = hashlib.sha1(sensor_config['sensor_title'].encode("utf-8")).hexdigest()
         filename = 'sensor-data-' + sensor_config['sensor_hash'] + '.rrd'
         filepath = os.path.join(os.environ['SCRATCH'], filename)
         if not os.path.exists(filepath):
