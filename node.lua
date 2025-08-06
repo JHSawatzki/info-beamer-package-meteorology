@@ -195,7 +195,7 @@ util.json_watch("config.json", function(config)
     sensors_per_page_hw = sensors_horizontally * sensors_vertically
     sensors_per_page = math.min(sensors_per_page_hw, node_config.sensors_per_page)
     if node_config.sensors_per_page < sensors_per_page_hw then
-        squared_sensors_per_slot = math.ceil(math.sqrt(node_config.sensors_per_page))
+        local squared_sensors_per_slot = math.ceil(math.sqrt(node_config.sensors_per_page))
         while sensors_horizontally > squared_sensors_per_slot do
             if (sensors_horizontally - 1) * sensors_vertically >= node_config.sensors_per_page then
                 sensors_horizontally = sensors_horizontally - 1
