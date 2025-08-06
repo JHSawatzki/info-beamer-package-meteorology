@@ -50,6 +50,7 @@ local line_spacing = 10
 local sensor_tile_width_init = 500
 local sensor_tile_height_init = 300
 local sensor_tile_width = sensor_tile_width_init
+local sensor_tile_height = sensor_tile_height_init
 local page_identifier = sensor_tile_height_init
 
 local calc_width = WIDTH - (2 * margin)
