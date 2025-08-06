@@ -182,7 +182,7 @@ def acquire_sensors(date_time, date_time_last, queue):
 
     print(sensors, file=sys.stderr)
     with open('sensors.json', 'wb') as f:
-        f.write(json.dumps(sorted(sensors, key=itemgetter(0)), ensure_ascii=False).encode('utf8'))
+        f.write(json.dumps(sorted(sensors, key=itemgetter('sensor_title')), ensure_ascii=False).encode('utf8'))
 
 class SensorDownloadWorker(Thread):
     def __init__(self, queue, semaphore):
