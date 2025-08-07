@@ -278,7 +278,7 @@ node.event("content_update", function(name)
                         sensor_images[sensor_hash].daily:dispose()
                         sensor_images[sensor_hash].daily = nil
                     end
-                    sensor_images[sensor_hash]].daily = resource.load_image{ file = name }
+                    sensor_images[sensor_hash].daily = resource.load_image{ file = name }
                 elseif name:find("-monthly.png$") then
                     if sensor_images[sensor_hash].monthly ~= nil then
                         sensor_images[sensor_hash].monthly:dispose()
