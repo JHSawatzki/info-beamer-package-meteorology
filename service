@@ -222,10 +222,10 @@ def main():
         worker.start()
 
     last_call = current_time()
-    if last_call.minutes < 10:
-        last_call.replace(hour=last_call.hours - 1, minute = 60 + (last_call.minutes - 10))
+    if last_call.minute < 10:
+        last_call.replace(hour=last_call.hour - 1, minute = 60 + (last_call.minute - 10))
     else:
-        last_call.replace(minute = last_call.minutes - 10)
+        last_call.replace(minute = last_call.minute - 10)
 
     while 1:
         try:
