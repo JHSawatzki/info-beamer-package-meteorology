@@ -221,7 +221,11 @@ def main():
         worker.daemon = True
         worker.start()
 
-    last_call = current_time() - 600;
+    last_call = current_time()
+    if last_call.minutes < 10:
+        last_call.replace(hour=last_call.hours - 1, minute = 60 + (last_call.minutes - 10))
+    else:
+        last_call.replace(minute = last_call.minutes - 10)
 
     while 1:
         try:
@@ -234,7 +238,7 @@ def main():
 
             acquire_sensors(now, last_call, workQueue)
             delta = now - last_call
-            if delta.seconds >= 600:
+            if delta.total_seconds() >= 600:
                 last_call = now;
             idle(config.refresh_rate)
         except Exception:
