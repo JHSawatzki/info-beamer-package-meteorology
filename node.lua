@@ -269,9 +269,12 @@ util.json_watch("sensors.json", function(sensors)
 end)
 
 node.event("content_update", function(name)
+    print(name)
     if name:find(".png$") and name:find("^sensor-data-") then
         local i, sensor_hash = next(sensor_hashs, nil) -- Get first hash
         while i do
+            print(sensor_hash)
+            print(string.sub(name, 13, 53))
             if sensor_hash == string.sub(name, 13, 53) then
                 if name:find("-daily.png$") then
                     if sensor_images[sensor_hash].daily ~= nil then
