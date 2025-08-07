@@ -28,11 +28,14 @@ util.noglobals()
 node.make_nested()
 
 local json = require "json"
+local sha1 = require "sha1"
 
 local font = resource.load_font("slkscr.ttf")
 local node_config = {}
 local node_i18n = {}
 local node_sensors = {}
+local sensor_hashs = {}
+local sensor_images = {}
 
 local temparature_identifier = "Temperature"
 local humidity_identifier = "Humidity"
@@ -218,6 +221,33 @@ util.json_watch("config.json", function(config)
     sensor_tile_width = sensor_tile_width_init + ((calc_width - (sensors_horizontally * sensor_tile_width_init)) / sensors_horizontally)
     sensor_tile_height = sensor_tile_height_init + ((calc_height - (sensors_vertically * sensor_tile_height_init)) / sensors_vertically)
     i18n(node_i18n)
+
+    sensor_hashs = {}
+    sensor_images = {}
+    local i, sensor_config = next(node_config.sensors, nil) -- Get first sensor
+    while i do
+        sensor_hashs[i] = sha1.sha1(sensor_config.sensor_title)
+        if sensor_images[sensor_hashs[i]].daily ~= nil then
+            sensor_images[sensor_hashs[i]].daily:dispose()
+        end
+        if sensor_images[sensor_hashs[i]].monthly ~= nil then
+            sensor_images[sensor_hashs[i]].monthly:dispose()
+        end
+        if sensor_images[sensor_hashs[i]].yearly ~= nil then
+            sensor_images[sensor_hashs[i]].yearly:dispose()
+        end
+
+        sensor_images[sensor_hashs[i]].daily = nil
+        sensor_images[sensor_hashs[i]].monthly = nil
+        sensor_images[sensor_hashs[i]].yearly = nil
+
+        sensor_images[sensor_hashs[i]].daily = resource.load_image{ file = "myscratch/sensor-data-" .. sensor_hashs[i] .. "-daily.png" }
+        sensor_images[sensor_hashs[i]].monthly = resource.load_image{ file = "myscratch/sensor-data-" .. sensor_hashs[i] .. "-monthly.png" }
+        sensor_images[sensor_hashs[i]].yearly = resource.load_image{ file = "myscratch/sensor-data-" .. sensor_hashs[i] .. "-yearly.png" }
+
+        i, sensor_config = next(node_config.sensors, i) -- Get next sensor
+    end
+    node.gc()
 end)
 
 util.json_watch("i18n.json", function(i18n_config)
@@ -235,6 +265,46 @@ util.json_watch("sensors.json", function(sensors)
         current_page = 1
         last_page_change = clock.unix()
     end
+    -- TODO: Calculate optimal space for each sensor
+end)
+
+node.event("content_update", function(name)
+    if name:find(".png$") and name:find("^sensor-data-") then
+        local i, sensor_hash = next(sensor_hashs, nil) -- Get first hash
+        while i do
+            if sensor_hash == string.sub(name, 13, 53) then
+                if name:find("-daily.png$") then
+                    if sensor_images[sensor_hash].daily ~= nil then
+                        sensor_images[sensor_hash].daily:dispose()
+                        sensor_images[sensor_hash].daily = nil
+                    end
+                    sensor_images[sensor_hash]].daily = resource.load_image{ file = name }
+                elseif name:find("-monthly.png$") then
+                    if sensor_images[sensor_hash].monthly ~= nil then
+                        sensor_images[sensor_hash].monthly:dispose()
+                        sensor_images[sensor_hash].monthly = nil
+                    end
+                    sensor_images[sensor_hash].monthly = resource.load_image{ file = name }
+                elseif name:find("-yearly.png$") then
+                    if sensor_images[sensor_hash].yearly ~= nil then
+                        sensor_images[sensor_hash].yearly:dispose()
+                        sensor_images[sensor_hash].yearly = nil
+                    end
+                    sensor_images[sensor_hash].yearly = resource.load_image{ file = name }
+                end
+            end
+            i, sensor_hash = next(node_config.sensors, i) -- Get next hash
+        end
+    end
+end)
+
+function node.render()
+    gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
+
+    local x_pos = margin
+    local y_pos = margin
+
+    util.draw_correct(logo, x_pos, y_pos, 50, 50)
 
     -- Change page
     if clock.unix() - last_page_change > node_config.page_rate then
@@ -250,16 +320,6 @@ util.json_watch("sensors.json", function(sensors)
         end
         last_page_change = clock.unix()
     end
-    -- TODO: Calculate optimal space for each sensor
-end)
-
-function node.render()
-    gl.clear(node_config.bg_color.r, node_config.bg_color.g, node_config.bg_color.b, node_config.bg_color.a)
-
-    local x_pos = margin
-    local y_pos = margin
-
-    util.draw_correct(logo, x_pos, y_pos, 50, 50)
 
     local header_text = time_identifier .. ": " ..  clock.formatted() .. "  --  " .. page_identifier .. " " .. current_page .. "/" .. sensor_pages
     local text_width = font:width(header_text, font_size)
@@ -276,8 +336,7 @@ function node.render()
 
     while i do
         if i < starting_sensor_index then
-            -- Get next sensor
-            i, node_sensor = next(node_sensors, i)
+            i, node_sensor = next(node_sensors, i) -- Get next sensor
         else
             break
         end
@@ -291,7 +350,6 @@ function node.render()
                 -- Sensor available, display
                 x_pos = margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width
                 y_pos = margin + header_height + (sensors_vertically - sensors_vertically_loop) * sensor_tile_height
-                -- center vertically and horizontally
                 -- local sensor_header_text = sensor_identifier .. ": " .. node_sensor.sensor_title
                 local sensor_header_text = node_sensor.sensor_title
                 local sensor_type_text = ""
@@ -346,6 +404,7 @@ function node.render()
                     end
                 end
                 -- TODO: If sensor count is uneven for this page, then use the whole screen to display
+                -- center vertically and horizontally
                 x_pos = x_pos + (sensor_tile_width / 2) - (max_width / 2)
                 y_pos = y_pos + (sensor_tile_height / 2) - (actual_height / 2)
                 if x_pos < margin + (sensors_horizontally - sensors_horizontally_loop) * sensor_tile_width then
@@ -378,40 +437,24 @@ function node.render()
                         font:write(x_pos, y_pos, sensor_dew_point_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                         y_pos = y_pos + font_size + line_spacing
                     end
-                elseif view == 2 then 
-                    local sensor_history = resource.load_image{
-                        file = "myscratch/sensor-data-" .. node_sensor.sensor_hash .. "-daily.png";
-                    }
-                    if sensor_history ~= nil then
-                        util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
-                    end
-                elseif view == 3 then
-                    local sensor_history = resource.load_image{
-                        file = "myscratch/sensor-data-" .. node_sensor.sensor_hash .. "-monthly.png"
-                    }
-                    if sensor_history ~= nil then
-                        util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
-                    end
-                elseif view == 4 then
-                    local sensor_history = resource.load_image{
-                        file = "myscratch/sensor-data-" .. node_sensor.sensor_hash .. "-yearly.png"
-                    }
-                    if sensor_history ~= nil then
-                        util.draw_correct(sensor_history, x_pos, y_pos, 470, 240)
-                    end
+                elseif view == 2 and sensor_images[node_sensor.sensor_hash].daily ~= nil and sensor_images[node_sensor.sensor_hash].daily.state()[0] == "loaded" then
+                    util.draw_correct(sensor_images[node_sensor.sensor_hash].daily, x_pos, y_pos, 470, 240)
+                    y_pos = y_pos + 240 + line_spacing
+                elseif view == 3 and sensor_images[node_sensor.sensor_hash].monthly ~= nil and sensor_images[node_sensor.sensor_hash].monthly.state()[0] == "loaded" then
+                    util.draw_correct(sensor_images[node_sensor.sensor_hash].monthly, x_pos, y_pos, 470, 240)
+                    y_pos = y_pos + 240 + line_spacing
+                elseif view == 4 and sensor_images[node_sensor.sensor_hash].yearly ~= nil and sensor_images[node_sensor.sensor_hash].yearly.state()[0] == "loaded" then
+                    util.draw_correct(sensor_images[node_sensor.sensor_hash].yearly, x_pos, y_pos, 470, 240)
+                    y_pos = y_pos + 240 + line_spacing
                 end
-                -- Get next sensor
-                i, node_sensor = next(node_sensors, i)
+                i, node_sensor = next(node_sensors, i) -- Get next sensor
             else
-                -- No further sensor available
-                break
+                break -- No further sensor available
             end
-            -- No further sensor available
-            if not i then break end
+            if not i then break end -- No further sensor available
             sensors_horizontally_loop = sensors_horizontally_loop - 1
         end
-        -- No further sensor available
-        if not i then break end
+        if not i then break end -- No further sensor available
         sensors_vertically_loop = sensors_vertically_loop - 1
     end
 end
