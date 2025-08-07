@@ -23,7 +23,7 @@
 --]]
 gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 
-local sha1 = require "sha1"
+require "sha1"
 
 util.noglobals()
 
@@ -227,7 +227,7 @@ util.json_watch("config.json", function(config)
     sensor_images = {}
     local i, sensor_config = next(node_config.sensors, nil) -- Get first sensor
     while i do
-        sensor_hashs[i] = sha1.sha1(sensor_config.sensor_title)
+        sensor_hashs[i] = sha1(sensor_config.sensor_title)
         if sensor_images[sensor_hashs[i]].daily ~= nil then
             sensor_images[sensor_hashs[i]].daily:dispose()
         end
