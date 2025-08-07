@@ -228,19 +228,22 @@ util.json_watch("config.json", function(config)
     local i, sensor_config = next(node_config.sensors, nil) -- Get first sensor
     while i do
         sensor_hashs[i] = sha1(sensor_config.sensor_title)
-        if sensor_images[sensor_hashs[i]].daily ~= nil then
-            sensor_images[sensor_hashs[i]].daily:dispose()
-        end
-        if sensor_images[sensor_hashs[i]].monthly ~= nil then
-            sensor_images[sensor_hashs[i]].monthly:dispose()
-        end
-        if sensor_images[sensor_hashs[i]].yearly ~= nil then
-            sensor_images[sensor_hashs[i]].yearly:dispose()
+        if sensor_images[sensor_hashs[i]] ~= nil then
+            if sensor_images[sensor_hashs[i]].daily ~= nil then
+                sensor_images[sensor_hashs[i]].daily:dispose()
+                sensor_images[sensor_hashs[i]].daily = nil
+            end
+            if sensor_images[sensor_hashs[i]].monthly ~= nil then
+                sensor_images[sensor_hashs[i]].monthly:dispose()
+                sensor_images[sensor_hashs[i]].monthly = nil
+            end
+            if sensor_images[sensor_hashs[i]].yearly ~= nil then
+                sensor_images[sensor_hashs[i]].yearly:dispose()
+                sensor_images[sensor_hashs[i]].yearly = nil
+            end
         end
 
-        sensor_images[sensor_hashs[i]].daily = nil
-        sensor_images[sensor_hashs[i]].monthly = nil
-        sensor_images[sensor_hashs[i]].yearly = nil
+        sensor_images[sensor_hashs[i]] = {}
 
         sensor_images[sensor_hashs[i]].daily = resource.load_image{ file = "myscratch/sensor-data-" .. sensor_hashs[i] .. "-daily.png" }
         sensor_images[sensor_hashs[i]].monthly = resource.load_image{ file = "myscratch/sensor-data-" .. sensor_hashs[i] .. "-monthly.png" }
