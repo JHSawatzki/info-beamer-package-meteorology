@@ -23,12 +23,13 @@
 --]]
 gl.setup(NATIVE_WIDTH, NATIVE_HEIGHT)
 
+local sha1 = require "sha1"
+
 util.noglobals()
 
 node.make_nested()
 
 local json = require "json"
-local sha1 = require "sha1"
 
 local font = resource.load_font("slkscr.ttf")
 local node_config = {}
