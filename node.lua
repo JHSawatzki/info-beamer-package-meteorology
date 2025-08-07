@@ -444,13 +444,13 @@ function node.render()
                         font:write(x_pos, y_pos, sensor_dew_point_text, font_size, node_config.font_color.r, node_config.font_color.g, node_config.font_color.b, node_config.font_color.a)
                         y_pos = y_pos + font_size + line_spacing
                     end
-                elseif view == 2 and sensor_images[node_sensor.sensor_hash].daily ~= nil and sensor_images[node_sensor.sensor_hash].daily.state()[0] == "loaded" then
+                elseif view == 2 and sensor_images[node_sensor.sensor_hash].daily ~= nil and sensor_images[node_sensor.sensor_hash].daily:state()[0] == "loaded" then
                     util.draw_correct(sensor_images[node_sensor.sensor_hash].daily, x_pos, y_pos, 470, 240)
                     y_pos = y_pos + 240 + line_spacing
-                elseif view == 3 and sensor_images[node_sensor.sensor_hash].monthly ~= nil and sensor_images[node_sensor.sensor_hash].monthly.state()[0] == "loaded" then
+                elseif view == 3 and sensor_images[node_sensor.sensor_hash].monthly ~= nil and sensor_images[node_sensor.sensor_hash].monthly:state()[0] == "loaded" then
                     util.draw_correct(sensor_images[node_sensor.sensor_hash].monthly, x_pos, y_pos, 470, 240)
                     y_pos = y_pos + 240 + line_spacing
-                elseif view == 4 and sensor_images[node_sensor.sensor_hash].yearly ~= nil and sensor_images[node_sensor.sensor_hash].yearly.state()[0] == "loaded" then
+                elseif view == 4 and sensor_images[node_sensor.sensor_hash].yearly ~= nil and sensor_images[node_sensor.sensor_hash].yearly:state()[0] == "loaded" then
                     util.draw_correct(sensor_images[node_sensor.sensor_hash].yearly, x_pos, y_pos, 470, 240)
                     y_pos = y_pos + 240 + line_spacing
                 end
